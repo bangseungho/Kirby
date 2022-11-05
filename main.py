@@ -25,7 +25,7 @@ end_sec = 0
 dash = False
 temp_look_at_left = None
 cr_ob = [0, 0, 0, 0]
-
+replay = 0
 # Rect
 left = 0
 bottom = 1
