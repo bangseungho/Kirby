@@ -8,6 +8,7 @@ import math
 
 from pygame.draw import rect
 
+
 # global variable
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 450
@@ -25,6 +26,7 @@ end_sec = 0
 dash = False
 temp_look_at_left = None
 cr_ob = [0, 0, 0, 0]
+frame_work = 1
 
 # Rect
 left = 0
