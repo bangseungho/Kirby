@@ -1,5 +1,7 @@
 from pico2d import *
 import game_framework
+import stage_state
+import logo_state
 import game_world
 from kirby import Kirby
 
@@ -11,7 +13,10 @@ def handle_events():
         if event.type == SDL_QUIT:
             game_framework.quit()
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_ESCAPE):
-            game_framework.quit()
+            if len(game_framework.stack) == 2:
+                game_framework.pop_state()
+            else:
+                game_framework.quit()
         else:
             player.handle_event(event)
 

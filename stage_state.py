@@ -1,30 +1,21 @@
 from pico2d import *
 import game_framework
 import play_state
-import stage_state
+import logo_state
 
 image = None
 
 
 def enter():
     global image
-    image = load_image('resource/logo.png')
+    image = load_image('resource/stage.png')
+    pass
 
 
 def exit():
     global image
     del image
-
-
-def update():
-    global logo_time
-    delay(0.01)
-
-def draw():
-    global image
-    clear_canvas()
-    image.draw(800//2, 450//2)
-    update_canvas()
+    pass
 
 
 def handle_events():
@@ -33,6 +24,24 @@ def handle_events():
         if event.type == SDL_QUIT:
             game_framework.quit()
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
-            game_framework.quit()
+            game_framework.change_state(logo_state)
         elif event.type == SDL_KEYDOWN and event.key == SDLK_SPACE:
-            game_framework.change_state(stage_state)
+            game_framework.push_state(play_state)
+
+
+def draw():
+    clear_canvas()
+    image.draw(800//2, 450//2)
+    update_canvas()
+
+
+def update():
+    pass
+
+
+def pause():
+    pass
+
+
+def resume():
+    pass
