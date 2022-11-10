@@ -13,15 +13,16 @@ ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 8
 
 # 1 : 이벤트 정의
-RD, LD, RU, LU = range(4)
+RD, LD, RU, LU, SPACE = range(5)
 
-event_name = ['RD', 'LD', 'RU', 'LU']
+event_name = ['RD', 'LD', 'RU', 'LU', 'SPACE']
 
 key_event_table = {
     (SDL_KEYDOWN, SDLK_RIGHT): RD,
     (SDL_KEYDOWN, SDLK_LEFT): LD,
     (SDL_KEYUP, SDLK_RIGHT): RU,
-    (SDL_KEYUP, SDLK_LEFT): LU
+    (SDL_KEYUP, SDLK_LEFT): LU,
+    (SDL_KEYDOWN, SDLK_SPACE): SPACE
 }
 
 # 2 : 상태의 정의
@@ -83,10 +84,45 @@ class RUN:
                                            0, 'h', self.x, self.y, 100, 100)
 
 
+class JUMP:
+    def enter(self, event):
+        print('ENTER JUMP')
+        if event == RD:
+            self.dir += 1
+        elif event == LD:
+            self.dir -= 1
+        elif event == RU:
+            self.dir -= 1
+        elif event == LU:
+            self.dir += 1
+
+    def exit(self, event):
+        print('EXIT JUMP')
+        # self.face_dir = self.dir
+
+    def do(self):
+        self.face_dir = self.dir
+        self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
+        
+        if(self.y > 200): dir -= 1
+        elif(self.y < 0): dir += 1
+
+        self.y += dir * RUN_SPEED_PPS * game_framework.frame_time
+        self.x = clamp(0, self.x, 800)
+
+
+    def draw(self):
+        if self.face_dir == 1:
+            self.image.clip_composite_draw(int(self.frame) * 100, 100, 100, 100,
+                                           0, ' ', self.x, self.y, 100, 100)
+        else:
+            self.image.clip_composite_draw(int(self.frame) * 100, 100, 100, 100,
+                                           0, 'h', self.x, self.y, 100, 100)
+
 # 3. 상태 변환 구현
 next_state = {
-    IDLE:  {RU: RUN,  LU: RUN,  RD: RUN,  LD: RUN},
-    RUN:   {RU: IDLE, LU: IDLE, RD: IDLE, LD: IDLE},
+    IDLE:  {RU: RUN,  LU: RUN,  RD: RUN,  LD: RUN, SPACE: JUMP},
+    RUN:   {RU: IDLE, LU: IDLE, RD: IDLE, LD: IDLE, SPACE: JUMP, SPACE: RUN},
 }
 
 
