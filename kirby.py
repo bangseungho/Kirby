@@ -11,8 +11,8 @@ RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
 TIME_PER_ACTION = 0.5
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 8
-VELOCITY = 60
-MASS = 0.005
+VELOCITY = 90
+MASS = 0.02
 
 # 1 : 이벤트 정의
 RD, LD, RU, LU, SPACE = range(5)
@@ -104,26 +104,18 @@ class JUMP:
         self.frame = (self.frame + FRAMES_PER_ACTION *
                       ACTION_PER_TIME * game_framework.frame_time) % 8
         
-        print(self.dir)
-
         self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
 
         if self.v > 0:
-            print(self.v)
-            F = (0.5 * self.m * (self.v ** 2))
+            F = (0.03 * self.m * (self.v ** 2))
         else:
-            print(self.v)
-            F = -(0.5 * self.m * (self.v ** 2))
+            F = -(0.005 * self.m * (self.v ** 2))
 
         self.y += round(F)
         self.v -= 1
 
         if self.y < 50 :
             self.y = 50
-            if self.prev_state == IDLE:
-                self.cur_state = IDLE
-            if self.prev_state == RUN:
-                self.cur_state = RUN
             
 
     @staticmethod
@@ -140,7 +132,7 @@ class JUMP:
 next_state = {
     IDLE:  {RU: RUN,  LU: RUN,  RD: RUN,  LD: RUN, SPACE: JUMP},
     RUN:   {RU: IDLE, LU: IDLE, RD: IDLE, LD: IDLE, SPACE: JUMP},
-    JUMP:  {RU: RUN, LU: RUN, RD: RUN, LD: RUN, SPACE: JUMP}
+    JUMP:  {RU: JUMP, LU: JUMP, RD: JUMP, LD: JUMP, SPACE: JUMP}
 }
 
 
