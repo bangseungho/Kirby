@@ -1,4 +1,5 @@
 from pico2d import *
+from star import Star 
 import game_world
 import game_framework
 
@@ -16,15 +17,17 @@ MASS = 0.005
 GRAVITY = 60
 
 # 1 : 이벤트 정의
-RD, LD, RU, LU = range(4)
+RD, LD, RU, LU, TIMER, CD, CU = range(7)
 
-event_name = ['RD', 'LD', 'RU', 'LU']
+event_name = ['RD', 'LD', 'RU', 'LU', 'TIMER', 'CD', 'CU']
 
 key_event_table = {
     (SDL_KEYDOWN, SDLK_RIGHT): RD,
     (SDL_KEYDOWN, SDLK_LEFT): LD,
     (SDL_KEYUP, SDLK_RIGHT): RU,
     (SDL_KEYUP, SDLK_LEFT): LU,
+    (SDL_KEYDOWN, SDLK_LCTRL): CD,
+    (SDL_KEYUP, SDLK_LCTRL): CU,
 }
 
 # 2 : 상태의 정의
@@ -33,12 +36,16 @@ key_event_table = {
 class IDLE:
     @staticmethod
     def enter(self, event):
+        global PREV
+        PREV = IDLE
         print('ENTER IDLE')
         self.dir = 0
+        self.timer = 40
 
     @staticmethod
     def exit(self, event):
-        self.prev_state = IDLE
+        if self.isBite == 1 and event == CD:
+            self.fire_star()
         print('EXIT IDLE')
 
     @staticmethod
@@ -46,24 +53,35 @@ class IDLE:
         self.frame = (self.frame + FRAMES_PER_ACTION *
                       ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
         self.jump()
+        self.timer -= 1
 
     @staticmethod
     def draw(self):
-        if self.isJump == 0: # 기본 상태
-            self.set_speed(1, 6)
-            self.set_image(22, 20, 0)
-        elif self.isJump == 1: # 점프 상태
-            if self.isDrop != 0:
+        if self.isJump == 0:  # 기본 상태
+            if self.isBite == True:
+                self.set_speed(1, 6)
+                self.set_image(25, 22, 312)
+            if self.isBite == False:
+                self.set_speed(1, 6)
+                self.set_image(22, 20, 0)
+        elif self.isJump == 1:  # 점프 상태
+            if self.isDrop != 0 :
                 self.set_speed(1.5, 18)
                 self.set_image(27, 24, 138)
             else:
-                if self.v > 0:
-                    self.frame = 0
-                if self.frame > 8:
-                    self.frame = 8
-                self.set_speed(0.45, 10)
-                self.set_image(27, 22, 40)
-        else: # 나는 상태
+                if self.isBite:
+                    if self.frame > 5:
+                        self.frame = 5
+                    self.set_speed(0.8, 5)
+                    self.set_image(31, 29, 408)
+                else:
+                    if self.v > 0:
+                        self.frame = 0
+                    if self.frame > 8:
+                        self.frame = 8
+                    self.set_speed(0.45, 10)
+                    self.set_image(27, 22, 40)
+        else:  # 나는 상태
             if int(self.frame) == 12:
                 self.frame = 5
             self.set_speed(1.2, 13)
@@ -71,8 +89,13 @@ class IDLE:
         self.composite_draw()
 
 
+PREV = IDLE
+
+
 class RUN:
     def enter(self, event):
+        global PREV
+        PREV = RUN
         self.set_speed(0.5, 8)
         print('ENTER RUN')
         if event == RD:
@@ -85,8 +108,9 @@ class RUN:
             self.dir += 1
 
     def exit(self, event):
-        self.prev_state = RUN
         self.face_dir = self.dir
+        if self.isBite == 1 and event == CD:
+            self.fire_star()
         print('EXIT RUN')
 
     def do(self):
@@ -95,6 +119,72 @@ class RUN:
                       ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
         self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
 
+        if self.timer > 0 and self.isBite == False:
+            self.add_event(TIMER)
+        self.jump()
+
+        self.x = clamp(20, self.x, 780)
+
+    def draw(self):
+        if self.isJump == 0:
+            if self.isBite == True:
+                self.set_speed(0.7, 16)
+                self.set_image(26, 26, 356)
+            if self.isBite == False:
+                self.set_speed(0.7, 8)
+                self.set_image(23, 21, 186)
+        elif self.isJump == 1:  # 점프 상태
+            if self.isDrop != 0 :
+                self.set_speed(1.5, 18)
+                self.set_image(27, 24, 138)
+            else:
+                if self.isBite:
+                    if self.frame > 5:
+                        self.frame = 5
+                    self.set_speed(0.8, 5)
+                    self.set_image(31, 29, 408)
+                else:
+                    if self.v > 0:
+                        self.frame = 0
+                    if self.frame > 8:
+                        self.frame = 8
+                    self.set_speed(0.45, 10)
+                    self.set_image(27, 22, 40)
+        else:  # 나는 상태
+            if int(self.frame) == 12:
+                self.frame = 5
+            self.set_speed(1.2, 13)
+            self.set_image(28, 27, 84)
+        self.composite_draw()
+
+
+class DASH:
+    def enter(self, event):
+        self.set_speed(0.5, 8)
+        print('ENTER DASH')
+        if event == RD:
+            self.dir += 1
+        elif event == LD:
+            self.dir -= 1
+        elif event == RU:
+            self.dir -= 1
+        elif event == LU:
+            self.dir += 1
+
+    def exit(self, event):
+        self.face_dir = self.dir
+        print('EXIT DASH')
+
+    def do(self):
+        self.face_dir = self.dir
+        self.frame = (self.frame + FRAMES_PER_ACTION *
+                      ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
+
+        if self.isJump == 2 or self.isDrop:
+            self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
+        else:
+            self.x += self.dir * RUN_SPEED_PPS * 2 * game_framework.frame_time
+
         self.jump()
 
         self.x = clamp(20, self.x, 780)
@@ -102,8 +192,8 @@ class RUN:
     def draw(self):
         if self.isJump == 0:
             self.set_speed(0.7, 8)
-            self.set_image(23, 21, 186)
-        elif self.isJump == 1: # 점프 상태
+            self.set_image(26, 21, 228)
+        elif self.isJump == 1:  # 점프 상태
             if self.isDrop != 0:
                 self.set_speed(1.5, 18)
                 self.set_image(27, 24, 138)
@@ -114,17 +204,58 @@ class RUN:
                     self.frame = 8
                 self.set_speed(0.45, 10)
                 self.set_image(27, 22, 40)
-        else: # 나는 상태
+        else:  # 나는 상태
             if int(self.frame) == 12:
                 self.frame = 5
             self.set_speed(1.2, 13)
             self.set_image(28, 27, 84)
         self.composite_draw()
 
+
+class SUCK:
+    @staticmethod
+    def enter(self, event):
+        self.set_speed(0.6, 5)
+        self.frame = 0
+        self.dir = 0
+        self.isBite = False
+        print('ENTER SUCK')
+
+    @staticmethod
+    def exit(self, event):
+        if PREV == IDLE:
+            self.cur_state = IDLE
+        elif PREV == RUN:
+            if self.face_dir == 1:
+                self.dir += 1
+            else:
+                self.dir -= 1
+            self.cur_state = RUN
+        pass
+
+        print('EXIT SUCK')
+
+    @staticmethod
+    def do(self):
+
+        self.frame = (self.frame + FRAMES_PER_ACTION *
+                      ACTION_PER_TIME * game_framework.frame_time)
+
+        self.jump()
+
+    @staticmethod
+    def draw(self):
+        if int(self.frame) == 5:
+            self.frame = 2
+        self.set_image(25, 22, 270)
+        self.composite_draw()
+
 # 3. 상태 변환 구현
 next_state = {
-    IDLE:  {RU: RUN,  LU: RUN,  RD: RUN,  LD: RUN},
-    RUN:   {RU: IDLE, LU: IDLE, RD: IDLE, LD: IDLE},
+    IDLE:  {RU: RUN,  LU: RUN,  RD: RUN,  LD: RUN, CD: SUCK},
+    RUN:   {RU: IDLE, LU: IDLE, RD: IDLE, LD: IDLE, TIMER: DASH, CD: SUCK},
+    DASH:  {RU: IDLE, LU: IDLE, RD: IDLE, LD: IDLE, CD: SUCK},
+    SUCK:  {RU: IDLE, LU: IDLE, RD: RUN, LD: RUN}
 }
 
 
@@ -139,10 +270,11 @@ class Kirby:
         self.image = load_image('resource/Default_Kirby.png')
         self.event_que = []
         self.cur_state = IDLE
-        self.prev_state = None
         self.cur_state.enter(self, None)
         self.isJump = 0
         self.isDrop = 0
+        self.isBite = 0
+        self.timer = 0
 
     def update(self):
         self.cur_state.do(self)
@@ -155,6 +287,7 @@ class Kirby:
                 # 에러가 발생했으면, 그때 상태와 이벤트를 출력해본다.
                 print(self.cur_state, event_name[event])
             self.cur_state.enter(self, event)
+        print(self.cur_state)
 
     def draw(self):
         self.cur_state.draw(self)
@@ -189,8 +322,6 @@ class Kirby:
                 self.v = VELOCITY
                 self.isJump = 0
 
-            
-
         elif self.isJump == 2:
             self.v = 0
             self.y -= GRAVITY * game_framework.frame_time
@@ -205,7 +336,7 @@ class Kirby:
             if event.key == SDLK_SPACE:
                 if self.isJump == 0:
                     self.isJump = 1
-                elif self.isJump == 1:
+                elif self.isJump == 1  and self.isBite == False:
                     self.isJump = 2
             if event.key == SDLK_UP:
                 self.diry += 1
@@ -213,18 +344,21 @@ class Kirby:
                 self.diry -= 1
             if event.key == SDLK_SPACE:
                 self.frame = 0
+            if event.key == SDLK_b:
+                if self.isBite == False:
+                    self.isBite = True
+                else:
+                    self.isBite = False
         if event.type == SDL_KEYUP:
             if event.key == SDLK_UP:
-                    self.diry -= 1
+                self.diry -= 1
             if event.key == SDLK_DOWN:
-                    self.diry += 1
+                self.diry += 1
             if event.key == SDLK_SPACE:
                 if self.isJump == 2:
                     self.isJump = 1
                     self.isDrop = 2
                     self.frame = 0
-
-        
 
     def set_speed(self, time_per_action, frames_per_action):
         global FRAMES_PER_ACTION
@@ -246,3 +380,7 @@ class Kirby:
         self.w = width
         self.h = height
         self.image_posY = image_posY
+
+    def fire_star(self):
+        star = Star(self.x, self.y, self.face_dir*2)
+        game_world.add_object(star, 1)
