@@ -44,6 +44,7 @@ class IDLE:
 
     @staticmethod
     def exit(self, event):
+        self.prev_event = self.face_dir
         if self.isBite == 1 and event == CD:
             self.fire_star()
         print('EXIT IDLE')
@@ -64,6 +65,11 @@ class IDLE:
             if self.isBite == False:
                 self.set_speed(1, 6)
                 self.set_image(22, 20, 0)
+            if self.isBite == 2:
+                self.set_speed(0.3, 5)
+                self.set_image(24, 22, 466)
+                if self.frame > 4:
+                    self.isBite = False
         elif self.isJump == 1:  # 점프 상태
             if self.isDrop != 0 :
                 self.set_speed(1.5, 18)
@@ -109,6 +115,7 @@ class RUN:
 
     def exit(self, event):
         self.face_dir = self.dir
+        self.prev_event = self.face_dir
         if self.isBite == 1 and event == CD:
             self.fire_star()
         print('EXIT RUN')
@@ -119,7 +126,7 @@ class RUN:
                       ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
         self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
 
-        if self.timer > 0 and self.isBite == False:
+        if self.timer > 0 and self.isBite == False and self.face_dir == self.prev_event:
             self.add_event(TIMER)
         self.jump()
 
@@ -133,10 +140,21 @@ class RUN:
             if self.isBite == False:
                 self.set_speed(0.7, 8)
                 self.set_image(23, 21, 186)
+            if self.isBite == 2:
+                self.set_speed(0.3, 5)
+                self.set_image(24, 22, 466)
+                if self.frame > 4:
+                    self.isBite = False
         elif self.isJump == 1:  # 점프 상태
-            if self.isDrop != 0 :
+            if self.isBite == 2:
+                self.set_speed(0.3, 5)
+                self.set_image(24, 22, 466)
+                if self.frame > 4:
+                    self.isBite = False
+            elif self.isDrop != 0 :
                 self.set_speed(1.5, 18)
                 self.set_image(27, 24, 138)
+                
             else:
                 if self.isBite:
                     if self.frame > 5:
@@ -218,7 +236,7 @@ class SUCK:
         self.set_speed(0.6, 5)
         self.frame = 0
         self.dir = 0
-        self.isBite = False
+        self.isBite = 2
         print('ENTER SUCK')
 
     @staticmethod
@@ -237,7 +255,6 @@ class SUCK:
 
     @staticmethod
     def do(self):
-
         self.frame = (self.frame + FRAMES_PER_ACTION *
                       ACTION_PER_TIME * game_framework.frame_time)
 
@@ -271,6 +288,7 @@ class Kirby:
         self.event_que = []
         self.cur_state = IDLE
         self.cur_state.enter(self, None)
+        self.prev_event = None
         self.isJump = 0
         self.isDrop = 0
         self.isBite = 0
