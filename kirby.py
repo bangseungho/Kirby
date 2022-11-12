@@ -11,8 +11,9 @@ RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
 TIME_PER_ACTION = 0.5
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 8
-VELOCITY = 150
+VELOCITY = 160
 MASS = 0.005
+GRAVITY = 60
 
 # 1 : 이벤트 정의
 RD, LD, RU, LU = range(4)
@@ -28,18 +29,10 @@ key_event_table = {
 
 # 2 : 상태의 정의
 
-def set_speed(time_per_action, frames_per_action):
-    global FRAMES_PER_ACTION
-    global TIME_PER_ACTION
-    global ACTION_PER_TIME
-    TIME_PER_ACTION = time_per_action
-    ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
-    FRAMES_PER_ACTION = frames_per_action
 
 class IDLE:
     @staticmethod
     def enter(self, event):
-        set_speed(1, 6)
         print('ENTER IDLE')
         self.dir = 0
 
@@ -51,22 +44,36 @@ class IDLE:
     @staticmethod
     def do(self):
         self.frame = (self.frame + FRAMES_PER_ACTION *
-                      ACTION_PER_TIME * game_framework.frame_time) % 6
+                      ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
         self.jump()
 
     @staticmethod
     def draw(self):
-        if self.face_dir == 1:
-            self.image.clip_composite_draw(int(self.frame) * 22, 0, 22, 20,
-                                           0, ' ', self.x, self.y, 44, 40)
-        else:
-            self.image.clip_composite_draw(int(self.frame) * 22, 0, 22, 20,
-                                           0, 'h', self.x, self.y, 44, 40)
+        if self.isJump == 0: # 기본 상태
+            self.set_speed(1, 6)
+            self.set_image(22, 20, 0)
+        elif self.isJump == 1: # 점프 상태
+            if self.isDrop != 0:
+                self.set_speed(1.5, 18)
+                self.set_image(27, 24, 138)
+            else:
+                if self.v > 0:
+                    self.frame = 0
+                if self.frame > 8:
+                    self.frame = 8
+                self.set_speed(0.45, 10)
+                self.set_image(27, 22, 40)
+        else: # 나는 상태
+            if int(self.frame) == 12:
+                self.frame = 5
+            self.set_speed(1.2, 13)
+            self.set_image(28, 27, 84)
+        self.composite_draw()
 
 
 class RUN:
     def enter(self, event):
-        set_speed(0.5, 6)
+        self.set_speed(0.5, 8)
         print('ENTER RUN')
         if event == RD:
             self.dir += 1
@@ -85,21 +92,35 @@ class RUN:
     def do(self):
         self.face_dir = self.dir
         self.frame = (self.frame + FRAMES_PER_ACTION *
-                      ACTION_PER_TIME * game_framework.frame_time) % 8
+                      ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
         self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
 
         self.jump()
 
-        self.x = clamp(0, self.x, 800)
+        self.x = clamp(20, self.x, 780)
 
     def draw(self):
-        if self.face_dir == 1:
-            self.image.clip_composite_draw(int(self.frame) * 23, 186, 23, 21,
-                                           0, ' ', self.x, self.y, 46, 42)
-        else:
-            self.image.clip_composite_draw(int(self.frame) * 23, 186, 23, 21,
-                                           0, 'h', self.x, self.y, 46, 42)
-  
+        if self.isJump == 0:
+            self.set_speed(0.7, 8)
+            self.set_image(23, 21, 186)
+        elif self.isJump == 1: # 점프 상태
+            if self.isDrop != 0:
+                self.set_speed(1.5, 18)
+                self.set_image(27, 24, 138)
+            else:
+                if self.v > 0:
+                    self.frame = 0
+                if self.frame > 8:
+                    self.frame = 8
+                self.set_speed(0.45, 10)
+                self.set_image(27, 22, 40)
+        else: # 나는 상태
+            if int(self.frame) == 12:
+                self.frame = 5
+            self.set_speed(1.2, 13)
+            self.set_image(28, 27, 84)
+        self.composite_draw()
+
 # 3. 상태 변환 구현
 next_state = {
     IDLE:  {RU: RUN,  LU: RUN,  RD: RUN,  LD: RUN},
@@ -109,17 +130,19 @@ next_state = {
 
 class Kirby:
     def __init__(self):
-        self.x, self.y = 800 // 2, 50
+        self.x, self.y = 800 // 2, 90
         self.v, self.m = VELOCITY, MASS
+        self.w, self.h = 22, 20
+        self.image_posY = None
         self.frame = 0
-        self.dir, self.face_dir = 0, 1
+        self.dir, self.diry, self.face_dir = 0, 0, 1
         self.image = load_image('resource/Default_Kirby.png')
-        # self.timer = 100
         self.event_que = []
         self.cur_state = IDLE
         self.prev_state = None
         self.cur_state.enter(self, None)
         self.isJump = 0
+        self.isDrop = 0
 
     def update(self):
         self.cur_state.do(self)
@@ -144,24 +167,82 @@ class Kirby:
     def jump(self):
         if self.isJump == 1:
             if self.v > 0:
-                F = ( (RUN_SPEED_PPS * game_framework.frame_time / 20) * self.m * (self.v ** 2))
+                F = ((RUN_SPEED_PPS * game_framework.frame_time)
+                     * self.m * (self.v ** 2)) / 30
             else:
-                F = -((RUN_SPEED_PPS * game_framework.frame_time / 40) * self.m * (self.v ** 2))
+                F = -((RUN_SPEED_PPS * game_framework. frame_time)
+                      * self.m * (self.v ** 2)) / 100
 
             self.y += round(F)
             self.v -= 1
 
-            if self.y < 50:
-                self.y = 50
+            if self.isDrop == 2 and self.y < 90:
+                self.y = 90
+                self.v = VELOCITY - 30
+                self.isJump = 1
+                self.isDrop = 1
+
+            if self.y < 90:
+                if self.isDrop == 1:
+                    self.isDrop = 0
+                self.y = 90
                 self.v = VELOCITY
                 self.isJump = 0
+
+            
+
+        elif self.isJump == 2:
+            self.v = 0
+            self.y -= GRAVITY * game_framework.frame_time
+            self.y += self.diry * RUN_SPEED_PPS * game_framework.frame_time
+            self.y = clamp(90, self.y, 425)
 
     def handle_event(self, event):
         if (event.type, event.key) in key_event_table:
             key_event = key_event_table[(event.type, event.key)]
             self.add_event(key_event)
-        if (event.type, event.key) == (SDL_KEYDOWN, SDLK_SPACE):
-            if not self.isJump:
-                self.isJump = 1
-            elif self.isJump == 1:
-                self.isJump = 2
+        if event.type == SDL_KEYDOWN:
+            if event.key == SDLK_SPACE:
+                if self.isJump == 0:
+                    self.isJump = 1
+                elif self.isJump == 1:
+                    self.isJump = 2
+            if event.key == SDLK_UP:
+                self.diry += 1
+            if event.key == SDLK_DOWN:
+                self.diry -= 1
+            if event.key == SDLK_SPACE:
+                self.frame = 0
+        if event.type == SDL_KEYUP:
+            if event.key == SDLK_UP:
+                    self.diry -= 1
+            if event.key == SDLK_DOWN:
+                    self.diry += 1
+            if event.key == SDLK_SPACE:
+                if self.isJump == 2:
+                    self.isJump = 1
+                    self.isDrop = 2
+                    self.frame = 0
+
+        
+
+    def set_speed(self, time_per_action, frames_per_action):
+        global FRAMES_PER_ACTION
+        global TIME_PER_ACTION
+        global ACTION_PER_TIME
+        TIME_PER_ACTION = time_per_action
+        ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
+        FRAMES_PER_ACTION = frames_per_action
+
+    def composite_draw(self):
+        if self.face_dir == 1:
+            self.image.clip_composite_draw(int(
+                self.frame) * self.w, self.image_posY, self.w, self.h, 0, ' ', self.x, self.y, self.w * 2, self.h * 2)
+        else:
+            self.image.clip_composite_draw(int(
+                self.frame) * self.w, self.image_posY, self.w, self.h, 0, 'h', self.x, self.y, self.w * 2, self.h * 2)
+
+    def set_image(self, width, height, image_posY):
+        self.w = width
+        self.h = height
+        self.image_posY = image_posY
