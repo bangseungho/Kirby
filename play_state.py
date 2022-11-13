@@ -4,8 +4,10 @@ import stage_state
 import logo_state
 import game_world
 from kirby import Kirby
+from stage_1 import Stage
 
 player = None
+stage = None
 
 def handle_events():
     events = get_events()
@@ -19,13 +21,16 @@ def handle_events():
                 game_framework.quit()
         else:
             player.handle_event(event)
+            stage.move_stage(event, player.x, player.y)
 
 # 초기화
 def enter():
     global player
+    global stage
     player = Kirby()
-    game_world.add_object(player, 0)
-    pass
+    stage = Stage()
+    game_world.add_object(player, 1)
+    game_world.add_object(stage, 0)
 
 # 종료
 def exit():

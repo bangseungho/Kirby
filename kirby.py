@@ -141,11 +141,16 @@ class RUN:
                       ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
         self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
 
+        if self.x < 400 or self.x >= 1600:
+            self.screen_x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
+
         if self.timer > 0 and self.isBite == False and self.face_dir == self.prev_event:
             self.add_event(TIMER)
-        self.jump()
 
-        self.x = clamp(20, self.x, 780)
+        print("POS_X : ", self.x)
+        print("SCREEN_X : ", self.screen_x)
+    
+        self.jump()
 
     def draw(self):
         if self.isJump == 0:
@@ -206,21 +211,29 @@ class DASH:
 
     def exit(self, event):
         self.face_dir = self.dir
+        self.isDash = False
         print('EXIT DASH')
 
     def do(self):
         self.face_dir = self.dir
         self.frame = (self.frame + FRAMES_PER_ACTION *
                       ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
-
+                      
         if self.isJump == 2 or self.isDrop:
+            self.isDash = False
             self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
         else:
+            self.isDash = True
             self.x += self.dir * RUN_SPEED_PPS * 2 * game_framework.frame_time
+            
 
+        if self.x < 400 or self.x >= 1600:
+            self.screen_x += self.dir * RUN_SPEED_PPS * 2 * game_framework.frame_time
+
+        print("POS_X : ", self.x)
+        print("SCREEN_X : ", self.screen_x)
+        
         self.jump()
-
-        self.x = clamp(20, self.x, 780)
 
     def draw(self):
         if self.isJump == 0:
@@ -273,8 +286,8 @@ class SUCK:
     def do(self):
         self.frame = (self.frame + FRAMES_PER_ACTION *
                       ACTION_PER_TIME * game_framework.frame_time)
-        SUCK.range = [self.x - 50 + 50 * self.face_dir, self.y -
-                      22, self.x + 50 + 50 * self.face_dir, self.y + 22]
+        SUCK.range = [self.screen_x - 50 + 50 * self.face_dir, self.y -
+                      22, self.screen_x + 50 + 50 * self.face_dir, self.y + 22]
         self.jump()
 
     @staticmethod
@@ -299,6 +312,7 @@ next_state = {
 class Kirby:
     def __init__(self):
         self.x, self.y = 800 // 2, 90
+        self.screen_x, self.screen_y = 800// 2, 90
         self.v, self.m = VELOCITY, MASS
         self.w, self.h = 22, 20
         self.image_posY = None
@@ -312,6 +326,7 @@ class Kirby:
         self.isJump = 0
         self.isDrop = 0
         self.isBite = 0
+        self.isDash = 0
         self.timer = 0
         self.collider = [0, 0, 0, 0]
 
@@ -326,7 +341,6 @@ class Kirby:
                 # 에러가 발생했으면, 그때 상태와 이벤트를 출력해본다.
                 print(self.cur_state, event_name[event])
             self.cur_state.enter(self, event)
-        print(self.isBite)
 
     def draw(self):
         self.cur_state.draw(self)
@@ -368,6 +382,7 @@ class Kirby:
             self.y -= GRAVITY * game_framework.frame_time
             self.y += self.diry * RUN_SPEED_PPS * game_framework.frame_time
             self.y = clamp(90, self.y, 425)
+        
 
     def handle_event(self, event):
         if (event.type, event.key) in key_event_table:
@@ -413,10 +428,10 @@ class Kirby:
     def composite_draw(self):
         if self.face_dir == 1:
             self.image.clip_composite_draw(int(
-                self.frame) * self.w, self.image_posY, self.w, self.h, 0, ' ', self.x, self.y, self.w * 2, self.h * 2)
+                self.frame) * self.w, self.image_posY, self.w, self.h, 0, ' ', self.screen_x, self.y, self.w * 2, self.h * 2)
         else:
             self.image.clip_composite_draw(int(
-                self.frame) * self.w, self.image_posY, self.w, self.h, 0, 'h', self.x, self.y, self.w * 2, self.h * 2)
+                self.frame) * self.w, self.image_posY, self.w, self.h, 0, 'h', self.screen_x, self.y, self.w * 2, self.h * 2)
 
     def set_image(self, width, height, image_posY):
         self.w = width
@@ -425,15 +440,15 @@ class Kirby:
         self.set_collider(width, height)
 
     def fire_star(self):
-        star = Star(self.x, self.y, self.face_dir*2)
+        star = Star(self.screen_x, self.y, self.face_dir*2)
         game_world.add_object(star, 1)
 
     def fire_breath(self):
-        breath = Breath(self.x, self.y, self.face_dir*2, self.face_dir)
+        breath = Breath(self.screen_x, self.y, self.face_dir*2, self.face_dir)
         game_world.add_object(breath, 1)
 
     def set_collider(self, width, height):
-        self.collider[LEFT] = self.x - width
+        self.collider[LEFT] = self.screen_x - width
         self.collider[BOTTOM] = self.y - height
-        self.collider[RIGHT] = self.x + width
+        self.collider[RIGHT] = self.screen_x + width
         self.collider[TOP] = self.y + height
