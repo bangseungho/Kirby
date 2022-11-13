@@ -1,5 +1,7 @@
 from pico2d import *
-from star import Star 
+from star import Star
+from breath import Breath
+from enum import Enum
 import game_world
 import game_framework
 
@@ -15,6 +17,11 @@ FRAMES_PER_ACTION = 8
 VELOCITY = 160
 MASS = 0.005
 GRAVITY = 60
+
+LEFT = 0
+BOTTOM = 1
+RIGHT = 2
+TOP = 3
 
 # 1 : 이벤트 정의
 RD, LD, RU, LU, TIMER, CD, CU = range(7)
@@ -47,6 +54,7 @@ class IDLE:
         self.prev_event = self.face_dir
         if self.isBite == 1 and event == CD:
             self.fire_star()
+            self.isBite = 2
         print('EXIT IDLE')
 
     @staticmethod
@@ -71,9 +79,15 @@ class IDLE:
                 if self.frame > 4:
                     self.isBite = False
         elif self.isJump == 1:  # 점프 상태
-            if self.isDrop != 0 :
+            if self.isBite == 2:
+                self.set_speed(0.3, 5)
+                self.set_image(24, 22, 466)
+                if self.frame > 4:
+                    self.isBite = False
+            elif self.isDrop != 0:
                 self.set_speed(1.5, 18)
                 self.set_image(27, 24, 138)
+
             else:
                 if self.isBite:
                     if self.frame > 5:
@@ -118,6 +132,7 @@ class RUN:
         self.prev_event = self.face_dir
         if self.isBite == 1 and event == CD:
             self.fire_star()
+            self.isBite = 2
         print('EXIT RUN')
 
     def do(self):
@@ -151,10 +166,10 @@ class RUN:
                 self.set_image(24, 22, 466)
                 if self.frame > 4:
                     self.isBite = False
-            elif self.isDrop != 0 :
+            elif self.isDrop != 0:
                 self.set_speed(1.5, 18)
                 self.set_image(27, 24, 138)
-                
+
             else:
                 if self.isBite:
                     if self.frame > 5:
@@ -231,12 +246,13 @@ class DASH:
 
 
 class SUCK:
+    range = [0, 0, 0, 0]
+
     @staticmethod
     def enter(self, event):
         self.set_speed(0.6, 5)
         self.frame = 0
         self.dir = 0
-        self.isBite = 2
         print('ENTER SUCK')
 
     @staticmethod
@@ -257,7 +273,8 @@ class SUCK:
     def do(self):
         self.frame = (self.frame + FRAMES_PER_ACTION *
                       ACTION_PER_TIME * game_framework.frame_time)
-
+        SUCK.range = [self.x - 50 + 50 * self.face_dir, self.y -
+                      22, self.x + 50 + 50 * self.face_dir, self.y + 22]
         self.jump()
 
     @staticmethod
@@ -265,12 +282,15 @@ class SUCK:
         if int(self.frame) == 5:
             self.frame = 2
         self.set_image(25, 22, 270)
+        draw_rectangle(SUCK.range[LEFT], SUCK.range[BOTTOM],
+                       SUCK.range[RIGHT], SUCK.range[TOP])
         self.composite_draw()
+
 
 # 3. 상태 변환 구현
 next_state = {
-    IDLE:  {RU: RUN,  LU: RUN,  RD: RUN,  LD: RUN, CD: SUCK},
-    RUN:   {RU: IDLE, LU: IDLE, RD: IDLE, LD: IDLE, TIMER: DASH, CD: SUCK},
+    IDLE:  {RU: RUN,  LU: RUN,  RD: RUN,  LD: RUN, CD: SUCK, CU: IDLE},
+    RUN:   {RU: IDLE, LU: IDLE, RD: IDLE, LD: IDLE, TIMER: DASH, CD: SUCK, CU: RUN},
     DASH:  {RU: IDLE, LU: IDLE, RD: IDLE, LD: IDLE, CD: SUCK},
     SUCK:  {RU: IDLE, LU: IDLE, RD: RUN, LD: RUN}
 }
@@ -293,6 +313,7 @@ class Kirby:
         self.isDrop = 0
         self.isBite = 0
         self.timer = 0
+        self.collider = [0, 0, 0, 0]
 
     def update(self):
         self.cur_state.do(self)
@@ -305,12 +326,14 @@ class Kirby:
                 # 에러가 발생했으면, 그때 상태와 이벤트를 출력해본다.
                 print(self.cur_state, event_name[event])
             self.cur_state.enter(self, event)
-        print(self.cur_state)
+        print(self.isBite)
 
     def draw(self):
         self.cur_state.draw(self)
         debug_print('pppp')
         debug_print(f'Face Dir: {self.face_dir}, Dir: {self.dir}')
+        draw_rectangle(self.collider[LEFT], self.collider[BOTTOM],
+                       self.collider[RIGHT], self.collider[TOP])
 
     def add_event(self, event):
         self.event_que.insert(0, event)
@@ -354,7 +377,7 @@ class Kirby:
             if event.key == SDLK_SPACE:
                 if self.isJump == 0:
                     self.isJump = 1
-                elif self.isJump == 1  and self.isBite == False:
+                elif self.isJump == 1 and self.isBite == False:
                     self.isJump = 2
             if event.key == SDLK_UP:
                 self.diry += 1
@@ -374,6 +397,7 @@ class Kirby:
                 self.diry += 1
             if event.key == SDLK_SPACE:
                 if self.isJump == 2:
+                    self.fire_breath()
                     self.isJump = 1
                     self.isDrop = 2
                     self.frame = 0
@@ -398,7 +422,18 @@ class Kirby:
         self.w = width
         self.h = height
         self.image_posY = image_posY
+        self.set_collider(width, height)
 
     def fire_star(self):
         star = Star(self.x, self.y, self.face_dir*2)
         game_world.add_object(star, 1)
+
+    def fire_breath(self):
+        breath = Breath(self.x, self.y, self.face_dir*2, self.face_dir)
+        game_world.add_object(breath, 1)
+
+    def set_collider(self, width, height):
+        self.collider[LEFT] = self.x - width
+        self.collider[BOTTOM] = self.y - height
+        self.collider[RIGHT] = self.x + width
+        self.collider[TOP] = self.y + height

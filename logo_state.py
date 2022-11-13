@@ -3,27 +3,64 @@ import game_framework
 import play_state
 import stage_state
 
-image = None
+back_ground_image = None
+logo_image = None
+press_start = None
+logo_time = 0
+logo_frame = 0
+back_ground_x = 800//2
+back_ground_y = 450//2
+posX, posY = 800//2, 550//2
+dir = 1
+pdir = 1
 
 
 def enter():
-    global image
-    image = load_image('presource/logo.png')
+    global back_ground_image
+    global logo_image
+    global press_start
+    back_ground_image = load_image('logo_background.png')
+    logo_image = load_image('logo.png')
+    press_start = load_image('press_start.png')
 
 
 def exit():
-    global image
-    del image
+    global back_ground_image
+    global logo_image
+    global press_start
+    del back_ground_image
+    del logo_image
+    del press_start
 
 
 def update():
     global logo_time
-    delay(0.01)
+    global logo_frame
+    global back_ground_x
+    global press_start
+    global dir
+    global pdir
+    global posY
+    logo_frame = (logo_frame + 10 * game_framework.frame_time) % 40
+
+    if back_ground_x > 450 or back_ground_x < 350:
+        dir *= -1
+    back_ground_x += 10 * dir * game_framework.frame_time
+
+    if posY > 285 or posY < 275:
+        pdir *= -1
+    posY += 10 * pdir * game_framework.frame_time
+
 
 def draw():
-    global image
+    global back_ground_image
+    global logo_image
     clear_canvas()
-    image.draw(800//2, 450//2)
+    back_ground_image.draw(back_ground_x, back_ground_y, 900, 450)
+    logo_image.clip_composite_draw(int(logo_frame) * 189, 0,
+                                   189, 124, 0, ' ', posX, posY, 500, 327)
+    press_start.draw(400, 68, 800, 136)
+
     update_canvas()
 
 

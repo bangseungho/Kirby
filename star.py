@@ -21,8 +21,9 @@ class Star:
                                        37, 37, self.rotate, ' ', self.x, self.y, 37, 37)
         self.effect.clip_composite_draw(int(self.frame) * 16 , 16,
                                        16, 16, 0, ' ', self.ex, self.ey, 32, 32)
+        
     def update(self):
-        self.x += self.velocity / 1.2
+        self.x += self.velocity / 1.5
         self.ex, self.ey = self.x + 15 * -1 * self.velocity, self.y
         self.frame = (self.frame + 5 * game_framework.frame_time) % 3
     
