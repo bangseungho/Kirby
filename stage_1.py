@@ -21,13 +21,16 @@ FRAMES_PER_ACTION = 8
 
 
 class Obstacle:
-    def __init__(self, l, b, r, t):
-        self.left, self.bottom, self.right, self.top = l, b, r, t
+    def __init__(self, x, y, w, h):
+        self.x, self.y = x, y
+        self.w, self.h = w, h
 
     def get_bb(self):
         return self.left, self.bottom, self.right, self.top
     
     def handle_collision(self, other, group):
+        if group == 'star:ob':
+            pass
         pass
 
 
@@ -40,7 +43,7 @@ class STAGE_1:
         self.land_image = load_image('stage1_land.png')
         self.next_portal = [600, 90, 650, 140]
         self.prev_portal = [0, 0, 0, 0]
-        STAGE_1.obstacle.append(Obstacle(555, 79, 610, 110))
+        STAGE_1.obstacle.append(Obstacle(582.5, 79, 27.5, 110))
         STAGE_1.obstacle.append(Obstacle(1065, 79, 1250, 110))
         STAGE_1.obstacle.append(Obstacle(1390, 79, 2000, 110))
         STAGE_1.obstacle.append(Obstacle(1580, 110, 1630, 240))
@@ -140,7 +143,6 @@ class Stage:
         self.prev_portal = [0, 0, 0, 0]
         self.background_image = load_image('stage1_background.png')
         self.land_image = load_image('stage1_land.png')
-        self.obstacles = []
 
     def update(self):
         self.cur_state.do(self)

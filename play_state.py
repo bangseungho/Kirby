@@ -2,6 +2,7 @@ from pico2d import *
 import game_framework
 import stage_state
 import logo_state
+import kirby
 import game_world
 from kirby import Kirby
 from stage_1 import Stage
@@ -33,9 +34,7 @@ def enter():
     game_world.add_object(stage, 0)
 
     # 충돌 대상 정보 등록
-    for ob in stage.cur_state.obstacle:
-        game_world.add_collision_pairs(player, ob, 'player:ob')
-
+    game_world.add_collision_pairs(player, stage.cur_state.obstacle, 'player:ob')
 # 종료
 def exit():
     game_world.clear()
@@ -43,7 +42,7 @@ def exit():
 def update():
     for game_object in game_world.all_objects():
         game_object.update()
-
+        game_object.x -= 1
     for a, b, group in game_world.all_collision_pairs():
         if collide(a, b):
             print('COLLISION ', group)

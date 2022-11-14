@@ -1,6 +1,8 @@
 from pico2d import *
 import game_world
 import game_framework
+import kirby
+import play_state
 
 class Star:
     image = None
@@ -33,3 +35,9 @@ class Star:
             self.rotate -= 0.02
         if self.x < 0 or self.x > 800:
             game_world.remove_object(self)
+
+    def get_bb(self):
+        return self.x - 19, self.y - 19, self.x + 19, self.y + 19
+
+    def handle_collision(self, other, group):
+        game_world.remove_object(self)

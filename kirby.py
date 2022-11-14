@@ -2,6 +2,7 @@ from pico2d import *
 from star import Star
 from breath import Breath
 from enum import Enum
+import play_state
 import game_world
 import game_framework
 
@@ -439,6 +440,7 @@ class Kirby:
     def fire_star(self):
         star = Star(self.screen_x, self.y, self.face_dir*2)
         game_world.add_object(star, 1)
+        game_world.add_collision_pairs(star, play_state.stage.cur_state.obstacle, 'star:ob')
 
     def fire_breath(self):
         breath = Breath(self.screen_x, self.y, self.face_dir*2, self.face_dir)
