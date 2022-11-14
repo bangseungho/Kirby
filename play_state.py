@@ -32,6 +32,10 @@ def enter():
     game_world.add_object(player, 1)
     game_world.add_object(stage, 0)
 
+    # 충돌 대상 정보 등록
+    for ob in stage.cur_state.obstacle:
+        game_world.add_collision_pairs(player, ob, 'player:ob')
+
 # 종료
 def exit():
     game_world.clear()
@@ -39,6 +43,12 @@ def exit():
 def update():
     for game_object in game_world.all_objects():
         game_object.update()
+
+    for a, b, group in game_world.all_collision_pairs():
+        if collide(a, b):
+            print('COLLISION ', group)
+            a.handle_collision(b, group)
+            b.handle_collision(a, group)
 
 def draw_world():
     for game_object in game_world.all_objects():
@@ -54,6 +64,16 @@ def pause():
 
 def resume():
     pass
+
+def collide(a, b):
+    la, ba, ra, ta = a.get_bb()
+    lb, bb, rb, tb = b.get_bb()
+
+    if la > rb: return False
+    if ra < lb: return False
+    if ta < bb: return False
+    if ba > tb: return False
+    return True
 
 def test_self():
     import play_state

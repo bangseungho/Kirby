@@ -328,7 +328,6 @@ class Kirby:
         self.isBite = 0
         self.isDash = 0
         self.timer = 0
-        self.collider = [0, 0, 0, 0]
 
     def update(self):
         self.cur_state.do(self)
@@ -346,8 +345,7 @@ class Kirby:
         self.cur_state.draw(self)
         debug_print('pppp')
         debug_print(f'Face Dir: {self.face_dir}, Dir: {self.dir}')
-        draw_rectangle(self.collider[LEFT], self.collider[BOTTOM],
-                       self.collider[RIGHT], self.collider[TOP])
+        draw_rectangle(*self.get_bb())
 
     def add_event(self, event):
         self.event_que.insert(0, event)
@@ -437,7 +435,6 @@ class Kirby:
         self.w = width
         self.h = height
         self.image_posY = image_posY
-        self.set_collider(width, height)
 
     def fire_star(self):
         star = Star(self.screen_x, self.y, self.face_dir*2)
@@ -447,8 +444,9 @@ class Kirby:
         breath = Breath(self.screen_x, self.y, self.face_dir*2, self.face_dir)
         game_world.add_object(breath, 1)
 
-    def set_collider(self, width, height):
-        self.collider[LEFT] = self.screen_x - width
-        self.collider[BOTTOM] = self.y - height
-        self.collider[RIGHT] = self.screen_x + width
-        self.collider[TOP] = self.y + height
+    def get_bb(self):
+        return self.screen_x - self.w, self.y - self.h, \
+                self.screen_x + self.w, self.y + self.h
+    
+    def handle_collision(self, other, group):
+        pass
