@@ -26,7 +26,7 @@ class Obstacle:
         self.w, self.h = w, h
 
     def get_bb(self):
-        return self.left, self.bottom, self.right, self.top
+        return self.x - self.w, self.y - self.h, self.x + self.w, self.y + self.h
     
     def handle_collision(self, other, group):
         if group == 'star:ob':
@@ -43,11 +43,11 @@ class STAGE_1:
         self.land_image = load_image('stage1_land.png')
         self.next_portal = [600, 90, 650, 140]
         self.prev_portal = [0, 0, 0, 0]
-        STAGE_1.obstacle.append(Obstacle(582.5, 79, 27.5, 110))
-        STAGE_1.obstacle.append(Obstacle(1065, 79, 1250, 110))
-        STAGE_1.obstacle.append(Obstacle(1390, 79, 2000, 110))
-        STAGE_1.obstacle.append(Obstacle(1580, 110, 1630, 240))
-        STAGE_1.obstacle.append(Obstacle(1630, 110, 1665, 180))
+        STAGE_1.obstacle.append(Obstacle(582.5, 95, 27.5, 15))
+        STAGE_1.obstacle.append(Obstacle(1157.5, 95, 92.5, 15))
+        STAGE_1.obstacle.append(Obstacle(1695, 95, 305, 15))
+        STAGE_1.obstacle.append(Obstacle(1605, 175, 25, 65))
+        STAGE_1.obstacle.append(Obstacle(1647.5, 145, 17.5, 35))
         print('ENTER STAGE1')
 
     @staticmethod
@@ -65,15 +65,11 @@ class STAGE_1:
             if play_state.player.dir != 0:
                 if play_state.player.isDash == False:
                     for ob in STAGE_1.obstacle:
-                        ob.left -= play_state.player.dir * \
-                            RUN_SPEED_PPS * game_framework.frame_time
-                        ob.right -= play_state.player.dir * \
+                        ob.x -= play_state.player.dir * \
                             RUN_SPEED_PPS * game_framework.frame_time
                 else:
                     for ob in STAGE_1.obstacle:
-                        ob.left -= play_state.player.dir * 2 * \
-                            RUN_SPEED_PPS * game_framework.frame_time
-                        ob.right -= play_state.player.dir * 2 * \
+                        ob.x -= play_state.player.dir * 2 * \
                             RUN_SPEED_PPS * game_framework.frame_time
 
         self.x = clamp(-1600, self.x, 0)
@@ -161,7 +157,7 @@ class Stage:
         self.cur_state.draw(self)
         # draw_rectangle(self.cur_state.obstacles[0])
         for ob in self.cur_state.obstacle:
-            draw_rectangle(ob.left, ob.bottom, ob.right, ob.top)
+            draw_rectangle(ob.x - ob.w, ob.y - ob.h, ob.x + ob.w, ob.y + ob.h)
         
 
     def add_event(self, event):
