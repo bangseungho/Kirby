@@ -6,9 +6,11 @@ import kirby
 import game_world
 from kirby import Kirby
 from stage_1 import Stage
+from spark import Spark
 
 player = None
 stage = None
+enemyss = None
 
 def handle_events():
     events = get_events()
@@ -28,13 +30,24 @@ def handle_events():
 def enter():
     global player
     global stage
-    player = Kirby()
+    global enemyss
     stage = Stage()
-    game_world.add_object(player, 1)
+    player = Kirby()
     game_world.add_object(stage, 0)
+    game_world.add_object(player, 1)
+
+    stage.enemys = Spark()
+    game_world.add_object(stage.enemys, 0)
+
 
     # 충돌 대상 정보 등록
-    game_world.add_collision_pairs(player, stage.cur_state.obstacle, 'player:ob')
+    game_world.add_collision_pairs(player, stage.obstacles, 'player:ob')
+    game_world.add_collision_pairs(stage.enemys, stage.obstacles, 'enemy:ob')
+    # game_world.add_collision_pairs(stage.enemys, stage.obstacles, 'enemy:ob')
+    # game_world.add_collision_pairs(stage.enemys2, stage.obstacles, 'enemy:ob')
+    # game_world.add_collision_pairs(stage.enemys3, stage.obstacles, 'enemy:ob')
+    # game_world.add_collision_pairs(stage.enemys4, stage.obstacles, 'enemy:ob')
+    # game_world.add_collision_pairs(stage.enemys5, stage.obstacles, 'enemy:ob')
 # 종료
 def exit():
     game_world.clear()
@@ -42,12 +55,12 @@ def exit():
 def update():
     for game_object in game_world.all_objects():
         game_object.isCollide = False
-
         game_object.update()
 
     for a, b, group in game_world.all_collision_pairs():
         if collide(a, b):
-            # print('COLLISION ', group)
+            # if type(a) != Kirby:
+            #     print(group)
             a.handle_collision(b, group)
             b.handle_collision(a, group)
 

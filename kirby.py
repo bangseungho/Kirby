@@ -139,9 +139,6 @@ class RUN:
         if self.timer > 0 and self.isBite == False and self.face_dir == self.prev_event:
             self.add_event(TIMER)
 
-        print("Player x = ", self.x)
-        print("Player screen_x = ", self.screen_x)
-
         self.jump()
 
     def draw(self):
@@ -453,7 +450,8 @@ class Kirby:
     def fire_star(self):
         star = Star(self.screen_x, self.y, self.face_dir*2)
         game_world.add_object(star, 1)
-        game_world.add_collision_pairs(star, play_state.stage.cur_state.obstacle, 'star:ob')
+        game_world.add_collision_pairs(star, play_state.stage.obstacles, 'star:ob')
+        game_world.add_collision_pairs(star, play_state.enemyss, 'star:enemy')
 
     def fire_breath(self):
         breath = Breath(self.screen_x, self.y, self.face_dir*2, self.face_dir)

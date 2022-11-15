@@ -12,9 +12,9 @@ class Star:
 
     def __init__(self, x=400, y=300, velocity=1):
         if Star.image == None:
-            Star.image = load_image('star.png')
+            Star.image = load_image('resource/star.png')
         if Star.effect == None:
-            Star.effect = load_image('spit.png')
+            Star.effect = load_image('resource/spit.png')
         self.x, self.y, self.velocity = x + 1 * velocity * 20, y, velocity
         self.ex, self.ey = x, y
 
@@ -40,4 +40,5 @@ class Star:
         return self.x - 19, self.y - 19, self.x + 19, self.y + 19
 
     def handle_collision(self, other, group):
-        game_world.remove_object(self)
+            game_world.remove_object(self)
+            

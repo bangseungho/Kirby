@@ -3,6 +3,7 @@ import game_world
 import game_framework
 import play_state
 from player_speed import *
+from spark import Spark
 
 NEXT, PREV, UD = range(3)
 
@@ -26,20 +27,19 @@ class Obstacle:
 
 
 class STAGE_1:
-    obstacle = []
-
     @staticmethod
     def enter(self, event):
-        self.background_image = load_image('stage1_background.png')
-        self.land_image = load_image('stage1_land.png')
+        self.background_image = load_image('resource/stage1_background.png')
+        self.land_image = load_image('resource/stage1_land.png')
         self.next_portal = [600, 90, 650, 140]
         self.prev_portal = [0, 0, 0, 0]
-        STAGE_1.obstacle.append(Obstacle(800, 38, 800, 30))
-        STAGE_1.obstacle.append(Obstacle(582.5, 85, 24, 15))
-        STAGE_1.obstacle.append(Obstacle(1157.5, 85, 89, 15))
-        STAGE_1.obstacle.append(Obstacle(1695, 85, 303, 15))
-        STAGE_1.obstacle.append(Obstacle(1605, 165, 30, 65))
-        STAGE_1.obstacle.append(Obstacle(1647.5, 132, 14, 35))
+        # self.add_enemy()
+        self.add_obstacle(800, 38, 800, 30)
+        self.add_obstacle(582.5, 85, 24, 15)
+        self.add_obstacle(1157.5, 85, 89, 15)
+        self.add_obstacle(1695, 85, 303, 15)
+        self.add_obstacle(1605, 165, 30, 65)
+        self.add_obstacle(1647.5, 132, 14, 35)
         print('ENTER STAGE1')
 
     @staticmethod
@@ -56,11 +56,11 @@ class STAGE_1:
 
             if play_state.player.dir != 0  and play_state.player.can_move:
                 if play_state.player.isDash == False:
-                    for ob in STAGE_1.obstacle:
+                    for ob in self.obstacles:
                         ob.x -= play_state.player.dir * \
                             RUN_SPEED_PPS * game_framework.frame_time
                 else:
-                    for ob in STAGE_1.obstacle:
+                    for ob in self.obstacles:
                         ob.x -= play_state.player.dir * 2 * \
                             RUN_SPEED_PPS * game_framework.frame_time
 
@@ -124,29 +124,25 @@ next_state = {
 class Stage:
     def __init__(self):
         self.event_que = []
+        self.obstacles = []
+        self.enemys = []
         self.cur_state = STAGE_1
         self.cur_state.enter(self, None)
         self.x, self.y = 0, 0
         self.next_portal = [0, 0, 0, 0]
         self.prev_portal = [0, 0, 0, 0]
-        self.background_image = load_image('stage1_background.png')
-        self.land_image = load_image('stage1_land.png')
-
+        self.background_image = load_image('resource/stage1_background.png')
+        self.land_image = load_image('resource/stage1_land.png')
+        
     def update(self):
         self.cur_state.do(self)
         max = 0
-        for ob in self.cur_state.obstacle:
+        for ob in self.obstacles:
             if play_state.player.screen_x > ob.x - ob.w - play_state.player.w + 10 and \
                play_state.player.screen_x < ob.x + ob.w + play_state.player.w - 10:
                 if ob.y + ob.h > max:
                     max = ob.y + ob.h + play_state.player.h
                 play_state.player.cur_floor = max
-
-        # print("player.isJump = ", play_state.player.isJump)
-        # print("player.v = ", play_state.player.v)
-        # print("player.y = ", play_state.player.y)
-
-
 
         if self.event_que:
             event = self.event_que.pop()
@@ -160,10 +156,24 @@ class Stage:
 
     def draw(self):
         self.cur_state.draw(self)
-        for ob in self.cur_state.obstacle:
+        for ob in self.obstacles:
             draw_rectangle(ob.x - ob.w, ob.y - ob.h, ob.x + ob.w, ob.y + ob.h)
-        
+    
+    def add_obstacle(self, x, y, w, h):
+        self.obstacles.append(Obstacle(x, y, w, h))
 
+    # def add_enemy(self):
+    #     self.enemys = Spark()
+    #     self.enemys2 = Spark()
+    #     self.enemys3 = Spark()
+    #     self.enemys4 = Spark()
+    #     self.enemys5 = Spark()
+    #     game_world.add_object(self.enemys, 1)
+    #     game_world.add_object(self.enemys2, 1)
+    #     game_world.add_object(self.enemys3, 1)
+    #     game_world.add_object(self.enemys4, 1)
+    #     game_world.add_object(self.enemys5, 1)
+        
     def add_event(self, event):
         self.event_que.insert(0, event)
 
