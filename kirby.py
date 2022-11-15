@@ -115,9 +115,9 @@ class RUN:
             self.dir -= 1
         elif event == LU:
             self.dir += 1
+        self.face_dir = self.dir
 
     def exit(self, event):
-        self.face_dir = self.dir
         self.prev_event = self.face_dir
         if self.isBite == 1 and event == CD:
             self.fire_star()
@@ -125,8 +125,6 @@ class RUN:
         print('EXIT RUN')
 
     def do(self):
-        self.can_move = True
-        self.face_dir = self.dir
         self.frame = (self.frame + FRAMES_PER_ACTION *
                       ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
 
@@ -135,12 +133,12 @@ class RUN:
         if self.x < 400 or self.x >= 1600:
             self.screen_x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
 
+        if not self.isCollide:
+            self.dir = self.face_dir
+
         if self.timer > 0 and self.isBite == False and self.face_dir == self.prev_event:
             self.add_event(TIMER)
 
-        print("POS_X : ", self.x)
-        print("SCREEN_X : ", self.screen_x)
-    
         self.jump()
 
     def draw(self):
@@ -199,15 +197,14 @@ class DASH:
             self.dir -= 1
         elif event == LU:
             self.dir += 1
+        self.face_dir = self.dir
 
     def exit(self, event):
-        self.face_dir = self.dir
         self.isDash = False
         print('EXIT DASH')
 
     def do(self):
         self.can_move = True
-        self.face_dir = self.dir
         self.frame = (self.frame + FRAMES_PER_ACTION *
                       ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
                       
@@ -217,11 +214,13 @@ class DASH:
         else:
             self.isDash = True
             self.x += self.dir * RUN_SPEED_PPS * 2 * game_framework.frame_time
-            
 
         if self.x < 400 or self.x >= 1600:
             self.screen_x += self.dir * RUN_SPEED_PPS * 2 * game_framework.frame_time
 
+        if not self.isCollide:
+            self.dir = self.face_dir
+        
         print("POS_X : ", self.x)
         print("SCREEN_X : ", self.screen_x)
         
@@ -319,8 +318,10 @@ class Kirby:
         self.isBite = 0
         self.isDash = 0
         self.timer = 0
-        self.can_move = True
-        self.cur_floor_posY = 90
+        self.can_move = 1
+        self.cur_floor = 90
+        self.can_jump = False
+        self.isCollide = 0
         
     def update(self):
         self.gravity()
@@ -344,11 +345,6 @@ class Kirby:
     def add_event(self, event):
         self.event_que.insert(0, event)
 
-    def get_floor(self, other):
-        if self.screen_x > other.x-other.w and self.screen_x < other.x + other.w:
-            self.cur_floor_posY = other.y + other.h + self.h
-        print(self.cur_floor_posY)
-
     def gravity(self):
         if self.v <= 0:
             F = -((RUN_SPEED_PPS * game_framework. frame_time)
@@ -356,24 +352,33 @@ class Kirby:
             self.y += round(F)
             self.v -= 1
             
+        elif self.y > self.cur_floor:
+            F = -((RUN_SPEED_PPS * game_framework. frame_time)
+                    * self.m * (self.v ** 2)) / 100
+            self.y += round(F)
+
+            if self.y < self.cur_floor:
+                self.y = self.cur_floor
+        
+
+
     def jump(self):
         if self.isJump == 1:
             if self.v > 0:
                 F = ((RUN_SPEED_PPS * game_framework.frame_time)
-                     * self.m * (self.v ** 2)) / 30
+                     * self.m * (self.v ** 2)) / 25
                 self.y += round(F)
                 self.v -= 1
                 
-            if self.isDrop == 2 and self.y < self.cur_floor_posY:
-                self.y = self.cur_floor_posY
+            if self.isDrop == 2 and self.y < self.cur_floor:
+                self.y = self.cur_floor
                 self.v = VELOCITY - 30
                 self.isJump = 1
                 self.isDrop = 1
 
-            if self.y < self.cur_floor_posY:
+            if self.y < self.cur_floor:
                 if self.isDrop == 1:
                     self.isDrop = 0
-                self.y = self.cur_floor_posY
                 self.v = VELOCITY
                 self.isJump = 0
 
@@ -381,7 +386,7 @@ class Kirby:
             self.v = 0
             self.y -= GRAVITY * game_framework.frame_time
             self.y += self.diry * RUN_SPEED_PPS * game_framework.frame_time
-            self.y = clamp(90, self.y, 425)
+            self.y = clamp(self.cur_floor, self.y, 425)
         
 
     def handle_event(self, event):
@@ -390,6 +395,7 @@ class Kirby:
             self.add_event(key_event)
         if event.type == SDL_KEYDOWN:
             if event.key == SDLK_SPACE:
+                self.can_jump = True
                 if self.isJump == 0:
                     self.isJump = 1
                 elif self.isJump == 1 and self.isBite == False:
@@ -448,19 +454,19 @@ class Kirby:
         game_world.add_object(breath, 1)
 
     def get_bb(self):
-        return self.screen_x - self.w, self.y - self.h, \
-                self.screen_x + self.w, self.y + self.h
+        return self.screen_x - 20, self.y - 20, \
+                self.screen_x + 20, self.y + 20
     
     def handle_collision(self, other, group):
         if group == 'player:ob':
-            if self.dir == 1 and self.face_dir == 1:
-                if self.x < other.px and self.y < other.py + other.h + self.h:
-                    self.screen_x = other.x - other.w - self.w
-                    self.x = other.px - other.w - self.w
-                    self.can_move = False
-            elif self.dir == -1 and self.face_dir == -1:
-                if self.x > other.px and self.y < other.py + other.h + self.h:
-                    self.screen_x = other.x + other.w + self.w
-                    self.x = other.px + other.w + self.w
-                    self.can_move = False
-            self.get_floor(other)
+            if self.dir == 1 and self.face_dir == 1 and self.screen_x < other.x and \
+                self.y < other.y + other.h + 20:
+                self.dir -= 1
+                self.isCollide = True
+                self.face_dir = 1
+            if self.dir == -1 and self.face_dir == -1 and self.screen_x > other.x and \
+                self.y < other.y + other.h + 20:
+                self.dir += 1
+                self.isCollide = True
+                self.face_dir = -1
+            

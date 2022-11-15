@@ -2,23 +2,13 @@ from pico2d import *
 import game_world
 import game_framework
 import play_state
+from player_speed import *
 
 NEXT, PREV, UD = range(3)
 
 event_name = ['NEXT', 'PREV', 'UD']
 
 cnt = 0
-
-PIXEL_PER_METER = (10.0 / 0.3)
-RUN_SPEED_KMPH = 30.0
-RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
-RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
-RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
-
-TIME_PER_ACTION = 0.5
-ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
-FRAMES_PER_ACTION = 8
-
 
 class Obstacle:
     def __init__(self, x, y, w, h):
@@ -44,6 +34,7 @@ class STAGE_1:
         self.land_image = load_image('stage1_land.png')
         self.next_portal = [600, 90, 650, 140]
         self.prev_portal = [0, 0, 0, 0]
+        STAGE_1.obstacle.append(Obstacle(800, 38, 800, 30))
         STAGE_1.obstacle.append(Obstacle(582.5, 95, 24, 15))
         STAGE_1.obstacle.append(Obstacle(1157.5, 95, 89, 15))
         STAGE_1.obstacle.append(Obstacle(1695, 95, 303, 15))
@@ -143,6 +134,19 @@ class Stage:
 
     def update(self):
         self.cur_state.do(self)
+        max = 0
+        for ob in self.cur_state.obstacle:
+            if play_state.player.screen_x > ob.x - ob.w - play_state.player.w + 10 and \
+               play_state.player.screen_x < ob.x + ob.w + play_state.player.w - 10:
+                if ob.y + ob.h > max:
+                    max = ob.y + ob.h + play_state.player.h
+                play_state.player.cur_floor = max
+
+        # print("player.isJump = ", play_state.player.isJump)
+        # print("player.v = ", play_state.player.v)
+        # print("player.y = ", play_state.player.y)
+
+
 
         if self.event_que:
             event = self.event_que.pop()
@@ -156,7 +160,6 @@ class Stage:
 
     def draw(self):
         self.cur_state.draw(self)
-        # draw_rectangle(self.cur_state.obstacles[0])
         for ob in self.cur_state.obstacle:
             draw_rectangle(ob.x - ob.w, ob.y - ob.h, ob.x + ob.w, ob.y + ob.h)
         

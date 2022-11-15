@@ -41,12 +41,16 @@ def exit():
     
 def update():
     for game_object in game_world.all_objects():
+        game_object.isCollide = False
+
         game_object.update()
+
     for a, b, group in game_world.all_collision_pairs():
         if collide(a, b):
-            print('COLLISION ', group)
+            # print('COLLISION ', group)
             a.handle_collision(b, group)
             b.handle_collision(a, group)
+
 
 def draw_world():
     for game_object in game_world.all_objects():
