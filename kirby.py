@@ -58,43 +58,43 @@ class IDLE:
         if self.isJump == 0:  # 기본 상태
             if self.isBite == True:
                 self.set_speed(1, 6)
-                self.set_image(25, 22, 312)
+                self.set_image(22, 22, 312, 3, 0)
             if self.isBite == False:
                 self.set_speed(1, 6)
-                self.set_image(26, 20, 0)
+                self.set_image(26, 20, 0, 0, 0)
             if self.isBite == 2:
                 self.set_speed(0.3, 5)
-                self.set_image(24, 22, 466)
+                self.set_image(24, 22, 466, 0, 0)
                 if self.frame > 4:
                     self.isBite = False
         elif self.isJump == 1:  # 점프 상태
             if self.isBite == 2:
                 self.set_speed(0.3, 5)
-                self.set_image(24, 22, 466)
+                self.set_image(24, 22, 466, 0, 0)
                 if self.frame > 4:
                     self.isBite = False
             elif self.isDrop != 0:
                 self.set_speed(1.5, 18)
-                self.set_image(27, 24, 138)
+                self.set_image(27, 24, 138, 0, 0)
 
             else:
                 if self.isBite:
                     if self.frame > 5:
                         self.frame = 5
                     self.set_speed(0.8, 5)
-                    self.set_image(31, 29, 408)
+                    self.set_image(24, 24, 408, 7, 7)
                 else:
                     if self.v > 0:
                         self.frame = 0
                     if self.frame > 8:
                         self.frame = 8
                     self.set_speed(0.45, 10)
-                    self.set_image(27, 22, 40)
+                    self.set_image(27, 22, 40, 0, 0)
         else:  # 나는 상태
             if int(self.frame) == 12:
                 self.frame = 5
             self.set_speed(1.2, 13)
-            self.set_image(28, 27, 84)
+            self.set_image(28, 27, 84, 0, 0)
         self.composite_draw()
 
 
@@ -139,49 +139,52 @@ class RUN:
         if self.timer > 0 and self.isBite == False and self.face_dir == self.prev_event:
             self.add_event(TIMER)
 
+        print("Player x = ", self.x)
+        print("Player screen_x = ", self.screen_x)
+
         self.jump()
 
     def draw(self):
         if self.isJump == 0:
             if self.isBite == True:
                 self.set_speed(0.7, 16)
-                self.set_image(26, 26, 356)
+                self.set_image(22, 22, 356, 4, 4) # 바꿀거
             if self.isBite == False:
                 self.set_speed(0.7, 8)
-                self.set_image(26, 21, 186)
+                self.set_image(26, 21, 186, 0, 0)
             if self.isBite == 2:
                 self.set_speed(0.3, 5)
-                self.set_image(24, 22, 466)
+                self.set_image(24, 22, 466, 0, 0)
                 if self.frame > 4:
                     self.isBite = False
         elif self.isJump == 1:  # 점프 상태
             if self.isBite == 2:
                 self.set_speed(0.3, 5)
-                self.set_image(24, 22, 466)
+                self.set_image(24, 22, 466, 0, 0)
                 if self.frame > 4:
                     self.isBite = False
             elif self.isDrop != 0:
                 self.set_speed(1.5, 18)
-                self.set_image(27, 24, 138)
+                self.set_image(27, 24, 138, 0, 0)
 
             else:
                 if self.isBite:
                     if self.frame > 5:
                         self.frame = 5
                     self.set_speed(0.8, 5)
-                    self.set_image(31, 29, 408)
+                    self.set_image(24, 24, 408, 7, 7) # 바꿀거
                 else:
                     if self.v > 0:
                         self.frame = 0
                     if self.frame > 8:
                         self.frame = 8
                     self.set_speed(0.45, 10)
-                    self.set_image(27, 22, 40)
+                    self.set_image(27, 22, 40, 0, 0)
         else:  # 나는 상태
             if int(self.frame) == 12:
                 self.frame = 5
             self.set_speed(1.2, 13)
-            self.set_image(28, 27, 84)
+            self.set_image(28, 27, 84, 0, 0)
         self.composite_draw()
 
 
@@ -229,23 +232,23 @@ class DASH:
     def draw(self):
         if self.isJump == 0:
             self.set_speed(0.7, 8)
-            self.set_image(26, 21, 228)
+            self.set_image(26, 21, 228, 0, 0)
         elif self.isJump == 1:  # 점프 상태
             if self.isDrop != 0:
                 self.set_speed(1.5, 18)
-                self.set_image(27, 24, 138)
+                self.set_image(27, 24, 138, 0, 0)
             else:
                 if self.v > 0:
                     self.frame = 0
                 if self.frame > 8:
                     self.frame = 8
                 self.set_speed(0.45, 10)
-                self.set_image(27, 22, 40)
+                self.set_image(27, 22, 40,0 , 0)
         else:  # 나는 상태
             if int(self.frame) == 12:
                 self.frame = 5
             self.set_speed(1.2, 13)
-            self.set_image(28, 27, 84)
+            self.set_image(28, 27, 84, 0, 0)
         self.composite_draw()
 
 
@@ -285,7 +288,7 @@ class SUCK:
     def draw(self):
         if int(self.frame) == 5:
             self.frame = 2
-        self.set_image(25, 22, 270)
+        self.set_image(25, 22, 270, 0, 0)
         draw_rectangle(SUCK.range[LEFT], SUCK.range[BOTTOM],
                        SUCK.range[RIGHT], SUCK.range[TOP])
         self.composite_draw()
@@ -304,7 +307,7 @@ class Kirby:
         self.x, self.y = 800 // 2, 90
         self.screen_x, self.screen_y = 800// 2, 90
         self.v, self.m = VELOCITY, MASS
-        self.w, self.h = 22, 20
+        self.w, self.h, self.tw, self.th = 22, 20, 0, 0
         self.image_posY = None
         self.frame = 0
         self.dir, self.diry, self.face_dir = 0, 0, 1
@@ -430,19 +433,22 @@ class Kirby:
         TIME_PER_ACTION = time_per_action
         ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
         FRAMES_PER_ACTION = frames_per_action
+        
+    def set_image(self, width, height, image_posY, trans_width, trans_height):
+        self.w = width
+        self.h = height
+        self.tw = trans_width
+        self.th = trans_height
+        self.image_posY = image_posY
 
     def composite_draw(self):
         if self.face_dir == 1:
             self.image.clip_composite_draw(int(
-                self.frame) * self.w, self.image_posY, self.w, self.h, 0, ' ', self.screen_x, self.y, self.w * 2, self.h * 2)
+                self.frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, ' ', self.screen_x + self.tw, self.y + self.th + 5, (self.w + self.tw) * 2, (self.h + self.th) * 2)
         else:
             self.image.clip_composite_draw(int(
-                self.frame) * self.w, self.image_posY, self.w, self.h, 0, 'h', self.screen_x, self.y, self.w * 2, self.h * 2)
+                self.frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, 'h', self.screen_x + self.tw, self.y + self.th + 5, (self.w + self.tw) * 2, (self.h + self.th) * 2)
 
-    def set_image(self, width, height, image_posY):
-        self.w = width
-        self.h = height
-        self.image_posY = image_posY
 
     def fire_star(self):
         star = Star(self.screen_x, self.y, self.face_dir*2)

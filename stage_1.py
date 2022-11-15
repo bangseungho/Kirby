@@ -35,11 +35,11 @@ class STAGE_1:
         self.next_portal = [600, 90, 650, 140]
         self.prev_portal = [0, 0, 0, 0]
         STAGE_1.obstacle.append(Obstacle(800, 38, 800, 30))
-        STAGE_1.obstacle.append(Obstacle(582.5, 95, 24, 15))
-        STAGE_1.obstacle.append(Obstacle(1157.5, 95, 89, 15))
-        STAGE_1.obstacle.append(Obstacle(1695, 95, 303, 15))
-        STAGE_1.obstacle.append(Obstacle(1605, 175, 22, 65))
-        STAGE_1.obstacle.append(Obstacle(1647.5, 145, 14, 35))
+        STAGE_1.obstacle.append(Obstacle(582.5, 85, 24, 15))
+        STAGE_1.obstacle.append(Obstacle(1157.5, 85, 89, 15))
+        STAGE_1.obstacle.append(Obstacle(1695, 85, 303, 15))
+        STAGE_1.obstacle.append(Obstacle(1605, 165, 30, 65))
+        STAGE_1.obstacle.append(Obstacle(1647.5, 132, 14, 35))
         print('ENTER STAGE1')
 
     @staticmethod
