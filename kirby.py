@@ -300,7 +300,6 @@ next_state = {
     SUCK:  {RU: IDLE, LU: IDLE, RD: RUN, LD: RUN}
 }
 
-
 class Kirby:
     def __init__(self):
         self.x, self.y = 800 // 2, 90
@@ -322,7 +321,7 @@ class Kirby:
         self.timer = 0
         self.can_move = True
         self.cur_floor_posY = 90
-
+        
     def update(self):
         self.gravity()
         self.cur_state.do(self)
@@ -345,6 +344,11 @@ class Kirby:
     def add_event(self, event):
         self.event_que.insert(0, event)
 
+    def get_floor(self, other):
+        if self.screen_x > other.x-other.w and self.screen_x < other.x + other.w:
+            self.cur_floor_posY = other.y + other.h + self.h
+        print(self.cur_floor_posY)
+
     def gravity(self):
         if self.v <= 0:
             F = -((RUN_SPEED_PPS * game_framework. frame_time)
@@ -360,16 +364,16 @@ class Kirby:
                 self.y += round(F)
                 self.v -= 1
                 
-            if self.isDrop == 2 and self.y < 90:
-                self.y = 90
+            if self.isDrop == 2 and self.y < self.cur_floor_posY:
+                self.y = self.cur_floor_posY
                 self.v = VELOCITY - 30
                 self.isJump = 1
                 self.isDrop = 1
 
-            if self.y < 90:
+            if self.y < self.cur_floor_posY:
                 if self.isDrop == 1:
                     self.isDrop = 0
-                self.y = 90
+                self.y = self.cur_floor_posY
                 self.v = VELOCITY
                 self.isJump = 0
 
@@ -459,5 +463,4 @@ class Kirby:
                     self.screen_x = other.x + other.w + self.w
                     self.x = other.px + other.w + self.w
                     self.can_move = False
-            if self.x > other.px - other.w and self.x < other.px + other.w:
-                self.cur_floor_posY = other.py + other.h
+            self.get_floor(other)
