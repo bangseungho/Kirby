@@ -22,6 +22,7 @@ FRAMES_PER_ACTION = 8
 
 class Obstacle:
     def __init__(self, x, y, w, h):
+        self.px, self.py = x, y
         self.x, self.y = x, y
         self.w, self.h = w, h
 
@@ -43,11 +44,11 @@ class STAGE_1:
         self.land_image = load_image('stage1_land.png')
         self.next_portal = [600, 90, 650, 140]
         self.prev_portal = [0, 0, 0, 0]
-        STAGE_1.obstacle.append(Obstacle(582.5, 95, 27.5, 15))
-        STAGE_1.obstacle.append(Obstacle(1157.5, 95, 92.5, 15))
-        STAGE_1.obstacle.append(Obstacle(1695, 95, 305, 15))
-        STAGE_1.obstacle.append(Obstacle(1605, 175, 25, 65))
-        STAGE_1.obstacle.append(Obstacle(1647.5, 145, 17.5, 35))
+        STAGE_1.obstacle.append(Obstacle(582.5, 95, 24, 15))
+        STAGE_1.obstacle.append(Obstacle(1157.5, 95, 89, 15))
+        STAGE_1.obstacle.append(Obstacle(1695, 95, 303, 15))
+        STAGE_1.obstacle.append(Obstacle(1605, 175, 22, 65))
+        STAGE_1.obstacle.append(Obstacle(1647.5, 145, 14, 35))
         print('ENTER STAGE1')
 
     @staticmethod
@@ -59,10 +60,10 @@ class STAGE_1:
         play_state.player.x = clamp(0, play_state.player.x, 2000)
         play_state.player.screen_x = clamp(20, play_state.player.screen_x, 780)
 
-        if play_state.player.x >= 400 and play_state.player.x < 1600:
+        if play_state.player.x >= 400 and play_state.player.x < 1600 and play_state.player.can_move:
             self.x = 400 - play_state.player.x
 
-            if play_state.player.dir != 0:
+            if play_state.player.dir != 0  and play_state.player.can_move:
                 if play_state.player.isDash == False:
                     for ob in STAGE_1.obstacle:
                         ob.x -= play_state.player.dir * \

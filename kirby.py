@@ -2,22 +2,10 @@ from pico2d import *
 from star import Star
 from breath import Breath
 from enum import Enum
+from player_speed import *
 import play_state
 import game_world
 import game_framework
-
-PIXEL_PER_METER = (10.0 / 0.3)
-RUN_SPEED_KMPH = 30.0
-RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
-RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
-RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
-
-TIME_PER_ACTION = 0.5
-ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
-FRAMES_PER_ACTION = 8
-VELOCITY = 160
-MASS = 0.005
-GRAVITY = 60
 
 LEFT = 0
 BOTTOM = 1
@@ -73,7 +61,7 @@ class IDLE:
                 self.set_image(25, 22, 312)
             if self.isBite == False:
                 self.set_speed(1, 6)
-                self.set_image(22, 20, 0)
+                self.set_image(26, 20, 0)
             if self.isBite == 2:
                 self.set_speed(0.3, 5)
                 self.set_image(24, 22, 466)
@@ -137,9 +125,11 @@ class RUN:
         print('EXIT RUN')
 
     def do(self):
+        self.can_move = True
         self.face_dir = self.dir
         self.frame = (self.frame + FRAMES_PER_ACTION *
                       ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
+
         self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
 
         if self.x < 400 or self.x >= 1600:
@@ -160,7 +150,7 @@ class RUN:
                 self.set_image(26, 26, 356)
             if self.isBite == False:
                 self.set_speed(0.7, 8)
-                self.set_image(23, 21, 186)
+                self.set_image(26, 21, 186)
             if self.isBite == 2:
                 self.set_speed(0.3, 5)
                 self.set_image(24, 22, 466)
@@ -216,6 +206,7 @@ class DASH:
         print('EXIT DASH')
 
     def do(self):
+        self.can_move = True
         self.face_dir = self.dir
         self.frame = (self.frame + FRAMES_PER_ACTION *
                       ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
@@ -329,8 +320,11 @@ class Kirby:
         self.isBite = 0
         self.isDash = 0
         self.timer = 0
+        self.can_move = True
+        self.cur_floor_posY = 90
 
     def update(self):
+        self.gravity()
         self.cur_state.do(self)
         if self.event_que:
             event = self.event_que.pop()
@@ -351,18 +345,21 @@ class Kirby:
     def add_event(self, event):
         self.event_que.insert(0, event)
 
+    def gravity(self):
+        if self.v <= 0:
+            F = -((RUN_SPEED_PPS * game_framework. frame_time)
+                    * self.m * (self.v ** 2)) / 100
+            self.y += round(F)
+            self.v -= 1
+            
     def jump(self):
         if self.isJump == 1:
             if self.v > 0:
                 F = ((RUN_SPEED_PPS * game_framework.frame_time)
                      * self.m * (self.v ** 2)) / 30
-            else:
-                F = -((RUN_SPEED_PPS * game_framework. frame_time)
-                      * self.m * (self.v ** 2)) / 100
-
-            self.y += round(F)
-            self.v -= 1
-
+                self.y += round(F)
+                self.v -= 1
+                
             if self.isDrop == 2 and self.y < 90:
                 self.y = 90
                 self.v = VELOCITY - 30
@@ -451,4 +448,16 @@ class Kirby:
                 self.screen_x + self.w, self.y + self.h
     
     def handle_collision(self, other, group):
-        pass
+        if group == 'player:ob':
+            if self.dir == 1 and self.face_dir == 1:
+                if self.x < other.px and self.y < other.py + other.h + self.h:
+                    self.screen_x = other.x - other.w - self.w
+                    self.x = other.px - other.w - self.w
+                    self.can_move = False
+            elif self.dir == -1 and self.face_dir == -1:
+                if self.x > other.px and self.y < other.py + other.h + self.h:
+                    self.screen_x = other.x + other.w + self.w
+                    self.x = other.px + other.w + self.w
+                    self.can_move = False
+            if self.x > other.px - other.w and self.x < other.px + other.w:
+                self.cur_floor_posY = other.py + other.h
