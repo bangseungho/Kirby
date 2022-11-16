@@ -28,6 +28,9 @@ class DEATH:
         if self.type == Type.Laser:
             self.set_speed(1.5, 1)
             self.set_image(19, 19, 80)
+        if self.type == Type.Hothead:
+            self.set_speed(1.5, 1)
+            self.set_image(23, 21, 84)
 
     @staticmethod
     def exit(self, event):
@@ -66,7 +69,10 @@ class PULL:
         if self.type == Type.Laser:
             self.set_speed(1.5, 1)
             self.set_image(19, 19, 80)
-
+        if self.type == Type.Hothead:
+            self.set_speed(1.5, 1)
+            self.set_image(23, 21, 84)
+            
     @staticmethod
     def exit(self, event):
         pass
@@ -100,7 +106,6 @@ class Enemy:
         self.cur_state = cur_state
         self.cur_state.enter(self, None)
         self.next_state = {}
-        self.timer = random.randint(1000, 1500)
         self.cooltime = 0
         self.dis_to_player = 1000
         self.height_to_player = 1000

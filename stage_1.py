@@ -5,6 +5,7 @@ import play_state
 from player_speed import *
 from spark import Spark
 from laser import Laser
+from hothead import Hothead
 
 NEXT, PREV, UD = range(3)
 
@@ -42,6 +43,7 @@ class STAGE_1:
         self.add_obstacle(1647.5, 132, 14, 35)
         self.add_enemy(3, Spark)
         self.add_enemy(1, Laser)
+        self.add_enemy(1, Hothead)
         game_world.add_objects(self.enemys, 1)
         print('ENTER STAGE1')
 

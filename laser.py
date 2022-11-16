@@ -18,7 +18,7 @@ class beam_laser:
         self.image.draw(self.x - 50, self.y, 64, 8)
 
     def get_bb(self):
-        return self.x + 32, self.y - 4, self.x + 32, self.y + 4
+        return self.x - 32, self.y - 4, self.x + 32, self.y + 4
 
     def update(self):
         if self.x < 0:
@@ -27,7 +27,8 @@ class beam_laser:
         Enemy.with_player(self)
 
     def handle_collision(self, other, group):
-        pass
+        if group == 'beams:player':
+            other.damaged(3)
 
 
 class ATTACK:
@@ -78,21 +79,14 @@ class Laser(Enemy):
         self.beam_start_time = 0
         self.beam_end_time = 0
         self.next_state = {
-            ATTACK: {SUCKED: PULL, DAMAGED: DEATH,},
+            ATTACK: {SUCKED: PULL, DAMAGED: DEATH, },
             PULL:   {DAMAGED: DEATH, SUCKED: PULL, TURN: ATTACK},
-            DEATH : {TURN: DEATH, DAMAGED: DEATH, SUCKED: DEATH }
-
+            DEATH: {TURN: DEATH, DAMAGED: DEATH, SUCKED: DEATH}
         }
         self.set_speed(1.3, 3)
         self.set_image(19, 19, 19)
-        self.beams = [beam_laser(0, 0)]
+        self.beams = []
         self.dir_y = 1
-
-        # RUN:  { TIMER: JUMP, PATROL: ATTACK, DAMAGED: DEATH, SUCKED: PULL },
-        # JUMP: { TURN: RUN, PATROL: ATTACK, DAMAGED: DEATH, SUCKED: PULL },
-        # ATTACK: { TURN: RUN, DAMAGED: DEATH, SUCKED: PULL },
-        # DEATH : { TURN: DEATH, PATROL: DEATH, DAMAGED: DEATH, SUCKED: DEATH },
-        # PULL : { TURN: RUN, PATROL: RUN, DAMAGED: DEATH, SUCKED: PULL }
 
     def scomposite_draw(self):
         if self.face_dir == 1:
@@ -105,6 +99,7 @@ class Laser(Enemy):
     def fire_beam_laser(self):
         self.beams.append(beam_laser(self.x, self.y))
         game_world.add_objects(self.beams, 1)
+        game_world.add_collision_pairs(self.beams, play_state.player, 'beams:player')
 
     def handle_collision(self, other, group):
         if group == 'star:enemy':

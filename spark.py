@@ -121,6 +121,7 @@ class Spark(Enemy):
         if Spark.image == None:
             Spark.image = load_image("resource/spark.png")
         self.temp_dir = 1
+        self.timer = random.randint(1000, 1500)
         self.next_state = {
             RUN:  { TIMER: JUMP, PATROL: ATTACK, DAMAGED: DEATH, SUCKED: PULL },
             JUMP: { TURN: RUN, PATROL: ATTACK, DAMAGED: DEATH, SUCKED: PULL },
@@ -141,6 +142,7 @@ class Spark(Enemy):
         if group == 'enemy:ob':
             self.dir *= -1
             self.timer = random.randint(200, 600)
+            self.y = other.y + other.h + self.h / 2
         if group == 'star:enemy':
             self.add_event(DAMAGED)
             self.dir_damge = other.face_dir

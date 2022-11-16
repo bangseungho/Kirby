@@ -8,6 +8,7 @@ from kirby import Kirby
 from stage_1 import Stage
 from spark import Spark
 from star import Star
+from hothead import Fire
 
 player = None
 stage = None
@@ -38,6 +39,7 @@ def enter():
     star = Star()
     game_world.add_object(stage, 0)
     game_world.add_object(player, 1)
+    game_world.add_object(star, 1)
     game_world.add_object(star, 1)
 
     # 충돌 대상 정보 등록

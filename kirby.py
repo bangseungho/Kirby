@@ -422,7 +422,7 @@ class Kirby:
     def jump(self):
         if self.isJump == 1:
             if self.v > 0:
-                F = ((RUN_SPEED_PPS * game_framework.frame_time)
+                F = ((RUN_SPEED_PPS * JUMP_HEIGHT)
                      * self.m * (self.v ** 2)) / 25
                 self.y += round(F)
                 self.v -= 1
@@ -513,7 +513,7 @@ class Kirby:
                 self.image.clip_composite_draw(int(
                     self.frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, 'h', self.screen_x + self.tw, self.y + self.th + 5, (self.w + self.tw) * 2, (self.h + self.th) * 2)
 
-    def damged(self, damage):
+    def damaged(self, damage):
 
         if not self.invincible:
             self.invincible_start_time = time.time()
@@ -555,9 +555,9 @@ class Kirby:
             if self.cur_state != SUCK:
                 if other.cur_state == ATTACK:
                     if int(other.frame) == 10:
-                        self.damged(3)
+                        self.damaged(3)
                 else:
-                    self.damged(1)
+                    self.damaged(1)
     
 
 
