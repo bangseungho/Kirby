@@ -33,13 +33,13 @@ class STAGE_1:
         self.land_image = load_image('resource/stage1_land.png')
         self.next_portal = [600, 90, 650, 140]
         self.prev_portal = [0, 0, 0, 0]
-        # self.add_enemy()
         self.add_obstacle(800, 38, 800, 30)
         self.add_obstacle(582.5, 85, 24, 15)
         self.add_obstacle(1157.5, 85, 89, 15)
         self.add_obstacle(1695, 85, 303, 15)
         self.add_obstacle(1605, 165, 30, 65)
         self.add_obstacle(1647.5, 132, 14, 35)
+        self.add_enemy()
         print('ENTER STAGE1')
 
     @staticmethod
@@ -54,7 +54,7 @@ class STAGE_1:
         if play_state.player.x >= 400 and play_state.player.x < 1600 and play_state.player.can_move:
             self.x = 400 - play_state.player.x
 
-            if play_state.player.dir != 0  and play_state.player.can_move:
+            if play_state.player.dir != 0 and play_state.player.can_move:
                 if play_state.player.isDash == False:
                     for ob in self.obstacles:
                         ob.x -= play_state.player.dir * \
@@ -162,18 +162,11 @@ class Stage:
     def add_obstacle(self, x, y, w, h):
         self.obstacles.append(Obstacle(x, y, w, h))
 
-    # def add_enemy(self):
-    #     self.enemys = Spark()
-    #     self.enemys2 = Spark()
-    #     self.enemys3 = Spark()
-    #     self.enemys4 = Spark()
-    #     self.enemys5 = Spark()
-    #     game_world.add_object(self.enemys, 1)
-    #     game_world.add_object(self.enemys2, 1)
-    #     game_world.add_object(self.enemys3, 1)
-    #     game_world.add_object(self.enemys4, 1)
-    #     game_world.add_object(self.enemys5, 1)
-        
+    def add_enemy(self):
+        self.enemys = [Spark() for i in range(3)]
+        game_world.add_objects(self.enemys, 1)
+        pass
+    
     def add_event(self, event):
         self.event_que.insert(0, event)
 

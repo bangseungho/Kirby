@@ -7,10 +7,12 @@ import game_world
 from kirby import Kirby
 from stage_1 import Stage
 from spark import Spark
+from star import Star
+from ball import Ball
 
 player = None
 stage = None
-enemyss = None
+star = None
 
 def handle_events():
     events = get_events()
@@ -30,24 +32,21 @@ def handle_events():
 def enter():
     global player
     global stage
-    global enemyss
+    global star
+    # global enemys
     stage = Stage()
     player = Kirby()
+    star = Star()
     game_world.add_object(stage, 0)
     game_world.add_object(player, 1)
-
-    stage.enemys = Spark()
-    game_world.add_object(stage.enemys, 0)
-
+    game_world.add_object(star, 1)
 
     # 충돌 대상 정보 등록
+    game_world.add_collision_pairs(player, stage.enemys, 'player:enemy')
     game_world.add_collision_pairs(player, stage.obstacles, 'player:ob')
-    game_world.add_collision_pairs(stage.enemys, stage.obstacles, 'enemy:ob')
-    # game_world.add_collision_pairs(stage.enemys, stage.obstacles, 'enemy:ob')
-    # game_world.add_collision_pairs(stage.enemys2, stage.obstacles, 'enemy:ob')
-    # game_world.add_collision_pairs(stage.enemys3, stage.obstacles, 'enemy:ob')
-    # game_world.add_collision_pairs(stage.enemys4, stage.obstacles, 'enemy:ob')
-    # game_world.add_collision_pairs(stage.enemys5, stage.obstacles, 'enemy:ob')
+    game_world.add_collision_pairs(star, stage.enemys, 'star:enemy')
+    game_world.add_collision_pairs(star, stage.obstacles, 'star:ob')
+    game_world.add_collision_pairs(stage.obstacles, stage.enemys, 'enemy:ob')
 # 종료
 def exit():
     game_world.clear()

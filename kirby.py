@@ -5,7 +5,9 @@ from enum import Enum
 from player_speed import *
 import play_state
 import game_world
+from spark import DAMAGED
 import game_framework
+from spark import ATTACK
 
 LEFT = 0
 BOTTOM = 1
@@ -139,6 +141,8 @@ class RUN:
         if self.timer > 0 and self.isBite == False and self.face_dir == self.prev_event:
             self.add_event(TIMER)
 
+        print(self.life)
+
         self.jump()
 
     def draw(self):
@@ -254,7 +258,7 @@ class SUCK:
 
     @staticmethod
     def enter(self, event):
-        self.set_speed(0.6, 5)
+        self.set_speed(0.3, 5)
         self.frame = 0
         self.dir = 0
         print('ENTER SUCK')
@@ -279,6 +283,26 @@ class SUCK:
                       ACTION_PER_TIME * game_framework.frame_time)
         SUCK.range = [self.screen_x - 50 + 50 * self.face_dir, self.y -
                       22, self.screen_x + 50 + 50 * self.face_dir, self.y + 22]
+
+        for enemy in play_state.stage.enemys:
+            if SUCK.range[RIGHT] > enemy.x - enemy.w and \
+               SUCK.range[LEFT] < enemy.x + enemy.w and \
+               SUCK.range[TOP] > enemy.y - enemy.h and \
+               SUCK.range[BOTTOM] < enemy.y + enemy.h:
+                if enemy.x < self.screen_x:
+                    enemy.x += RUN_SPEED_PPS * game_framework.frame_time / 1.3
+                else:
+                    enemy.x -= RUN_SPEED_PPS * game_framework.frame_time / 1.3
+                if enemy.y < self.y:
+                    enemy.y += RUN_SPEED_PPS * game_framework.frame_time / 1.1
+                elif enemy.y > self.y:
+                    enemy.y -= RUN_SPEED_PPS * game_framework.frame_time / 1.1
+
+                if enemy.dis_to_player <= 5:
+                    self.isBite = True
+                    enemy.death_timer = 1
+                    enemy.add_event(DAMAGED)
+        
         self.jump()
 
     @staticmethod
@@ -322,6 +346,8 @@ class Kirby:
         self.cur_floor = 90
         self.can_jump = False
         self.isCollide = 0
+        self.star = []
+        self.life = 100
         
     def update(self):
         self.gravity()
@@ -448,10 +474,10 @@ class Kirby:
 
 
     def fire_star(self):
-        star = Star(self.screen_x, self.y, self.face_dir*2)
-        game_world.add_object(star, 1)
-        game_world.add_collision_pairs(star, play_state.stage.obstacles, 'star:ob')
-        game_world.add_collision_pairs(star, play_state.enemyss, 'star:enemy')
+        play_state.star.x = self.screen_x
+        play_state.star.y = self.y
+        play_state.star.velocity = self.face_dir*2
+        play_state.star.isFire = True
 
     def fire_breath(self):
         breath = Breath(self.screen_x, self.y, self.face_dir*2, self.face_dir)
@@ -473,4 +499,13 @@ class Kirby:
                 self.dir += 1
                 self.isCollide = True
                 self.face_dir = -1
+        if group == 'player:enemy':
+            self.life -= 1
+            if other.cur_state == ATTACK:
+                if int(other.frame) == 10:
+                    self.life -= 3
+
+                    
+
+
             

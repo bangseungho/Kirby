@@ -3,9 +3,10 @@ from enum import Enum
 import play_state
 import game_framework
 import player_speed
+import random
 
-TIMER, TURN, PATROL = range(3)
-event_name = ['TIMER', 'TURN', 'PATROL']
+TIMER, TURN, PATROL, DAMAGED = range(4)
+event_name = ['TIMER', 'TURN', 'PATROL', 'DAMAGED']
 
 class EnemyType(Enum):
     Spark = 0
@@ -18,13 +19,14 @@ class Enemy:
         self.x, self.y = x, y
         self.w, self.h = w, h
         self.image_posY = image_posY
-        self.dir, self.face_dir = -1, -1
+        self.dir = random.randint(-1, 1)
+        self.face_dir = 0
         self.frame = 0
         self.event_que = []
         self.cur_state = cur_state
         self.cur_state.enter(self, None)
         self.next_state = {}
-        self.timer = 100
+        self.timer = random.randint(1000, 1500)
         self.cooltime = 0
         self.dis_to_player = 1000
         self.height_to_player = 1000
@@ -36,6 +38,9 @@ class Enemy:
         self.TIME_PER_ACTION = 1.3
         self.ACTION_PER_TIME = 1.0 / self.TIME_PER_ACTION
         self.FRAMES_PER_ACTION = 4
+        self.dir_damge = 0
+        self.isSuck = False
+        self.death_timer = 1000
 
     def update(self):
         self.cur_state.do(self)

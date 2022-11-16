@@ -19,9 +19,9 @@ def enter():
     global back_ground_image
     global logo_image
     global press_start
-    back_ground_image = load_image('logo_background.png')
-    logo_image = load_image('logo.png')
-    press_start = load_image('press_start.png')
+    back_ground_image = load_image('resource/logo_background.png')
+    logo_image = load_image('resource/logo.png')
+    press_start = load_image('resource/press_start.png')
 
 
 def exit():

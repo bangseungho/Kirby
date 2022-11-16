@@ -8,6 +8,8 @@ collision_group = dict()
 def add_object(o, depth):
     objects[depth].append(o)
 
+def add_objects(ol, depth):
+    objects[depth] += ol
 
 def remove_object(o):
     for layer in objects:
@@ -17,6 +19,7 @@ def remove_object(o):
             remove_collision_object(o)
             del o
             return
+
 
 def all_objects():
     for layer in objects:

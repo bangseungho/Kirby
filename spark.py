@@ -9,6 +9,8 @@ import game_world
 class RUN:
     @staticmethod
     def enter(self, event):
+        if self.dir == 0:
+            self.dir = 1
         self.timer = -1
         self.set_speed(1.3, 4)
         self.set_image(24, 19, 0)
@@ -24,13 +26,17 @@ class RUN:
         self.frame = (self.frame + self.FRAMES_PER_ACTION *
                       self.ACTION_PER_TIME * game_framework.frame_time) % self.FRAMES_PER_ACTION
 
+        self.y -= self.RUN_SPEED_PPS * game_framework.frame_time * 1.5
+        if self.y < 90:
+            self.y = 90
+
         if self.dis_to_player <= 100 and self.y > play_state.player.y:
             if self.x < play_state.player.screen_x:
                 self.dir = 1
             else:
                 self.dir = -1
         
-        if self.dis_to_player <= 60 and self.height_to_player <= 60 and self.cooltime == 0:
+        if self.dis_to_player <= 60 and self.cooltime == 0:
             self.add_event(PATROL)
 
         self.x += self.dir * self.RUN_SPEED_PPS * game_framework.frame_time
@@ -109,6 +115,40 @@ class ATTACK:
         self.scomposite_draw()
 
 
+class DEATH:
+    cnt = 0
+    @staticmethod
+    def enter(self, event):
+        self.frame = 0
+        self.set_speed(1.3, 2)
+        self.set_image(24, 18, 166)
+        pass
+
+    @staticmethod
+    def exit(self, event):
+        pass
+
+    @staticmethod
+    def do(self):
+        self.face_dir = self.dir_damge
+
+        self.x += self.dir_damge / 10
+
+        self.death_timer -= 1
+
+        if self.death_timer == 0:
+            self.x = -10000
+            game_world.remove_object(self)
+
+    def draw(self):
+        DEATH.cnt += 1
+
+        if self.death_timer > 500:
+            self.scomposite_draw()
+        elif DEATH.cnt % 2 == 0:
+            self.scomposite_draw()
+
+
 class Spark(Enemy):
     image = None
 
@@ -118,9 +158,10 @@ class Spark(Enemy):
             Spark.image = load_image("resource/spark.png")
         self.temp_dir = 1
         self.next_state = {
-            RUN:  { TIMER: JUMP, PATROL: ATTACK },
-            JUMP: { TURN: RUN, PATROL: ATTACK },
-            ATTACK: { TURN: RUN }
+            RUN:  { TIMER: JUMP, PATROL: ATTACK, DAMAGED: DEATH },
+            JUMP: { TURN: RUN, PATROL: ATTACK, DAMAGED: DEATH },
+            ATTACK: { TURN: RUN, DAMAGED: DEATH },
+            DEATH : { TURN: DEATH, PATROL: DEATH, DAMAGED: DEATH }
 
         }
 
@@ -135,6 +176,8 @@ class Spark(Enemy):
     def handle_collision(self, other, group):
         if group == 'enemy:ob':
             self.dir *= -1
-            self.timer = 500
+            self.timer = random.randint(200, 600)
         if group == 'star:enemy':
-            game_world.remove_object(self)
+            self.add_event(DAMAGED)
+            self.dir_damge = other.face_dir
+
