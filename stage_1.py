@@ -4,6 +4,7 @@ import game_framework
 import play_state
 from player_speed import *
 from spark import Spark
+from laser import Laser
 
 NEXT, PREV, UD = range(3)
 
@@ -39,7 +40,9 @@ class STAGE_1:
         self.add_obstacle(1695, 85, 303, 15)
         self.add_obstacle(1605, 165, 30, 65)
         self.add_obstacle(1647.5, 132, 14, 35)
-        self.add_enemy()
+        self.add_enemy(3, Spark)
+        self.add_enemy(1, Laser)
+        game_world.add_objects(self.enemys, 1)
         print('ENTER STAGE1')
 
     @staticmethod
@@ -162,11 +165,10 @@ class Stage:
     def add_obstacle(self, x, y, w, h):
         self.obstacles.append(Obstacle(x, y, w, h))
 
-    def add_enemy(self):
-        self.enemys = [Spark() for i in range(3)]
-        game_world.add_objects(self.enemys, 1)
-        pass
-    
+    def add_enemy(self, num, TYPE):
+        for n in range(num):
+            self.enemys.append(TYPE())
+
     def add_event(self, event):
         self.event_que.insert(0, event)
 

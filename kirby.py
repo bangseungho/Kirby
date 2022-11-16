@@ -8,6 +8,10 @@ import game_world
 from spark import DAMAGED
 import game_framework
 from spark import ATTACK
+from spark import SUCKED
+from spark import PULL
+from spark import TURN
+import time
 
 LEFT = 0
 BOTTOM = 1
@@ -15,9 +19,9 @@ RIGHT = 2
 TOP = 3
 
 # 1 : 이벤트 정의
-RD, LD, RU, LU, TIMER, CD, CU = range(7)
+RD, LD, RU, LU, TIMER, CD, CU, BITE = range(8)
 
-event_name = ['RD', 'LD', 'RU', 'LU', 'TIMER', 'CD', 'CU']
+event_name = ['RD', 'LD', 'RU', 'LU', 'TIMER', 'CD', 'CU', 'BITE']
 
 key_event_table = {
     (SDL_KEYDOWN, SDLK_RIGHT): RD,
@@ -141,8 +145,6 @@ class RUN:
         if self.timer > 0 and self.isBite == False and self.face_dir == self.prev_event:
             self.add_event(TIMER)
 
-        print(self.life)
-
         self.jump()
 
     def draw(self):
@@ -225,9 +227,6 @@ class DASH:
         if not self.isCollide:
             self.dir = self.face_dir
         
-        print("POS_X : ", self.x)
-        print("SCREEN_X : ", self.screen_x)
-        
         self.jump()
 
     def draw(self):
@@ -261,7 +260,6 @@ class SUCK:
         self.set_speed(0.3, 5)
         self.frame = 0
         self.dir = 0
-        print('ENTER SUCK')
 
     @staticmethod
     def exit(self, event):
@@ -273,8 +271,11 @@ class SUCK:
             else:
                 self.dir -= 1
             self.cur_state = RUN
-        pass
-
+        for enemy in play_state.stage.enemys:
+            if enemy.cur_state == PULL:
+                enemy.add_event(TURN)
+                
+        self.timer = 0
         print('EXIT SUCK')
 
     @staticmethod
@@ -289,19 +290,15 @@ class SUCK:
                SUCK.range[LEFT] < enemy.x + enemy.w and \
                SUCK.range[TOP] > enemy.y - enemy.h and \
                SUCK.range[BOTTOM] < enemy.y + enemy.h:
-                if enemy.x < self.screen_x:
-                    enemy.x += RUN_SPEED_PPS * game_framework.frame_time / 1.3
-                else:
-                    enemy.x -= RUN_SPEED_PPS * game_framework.frame_time / 1.3
-                if enemy.y < self.y:
-                    enemy.y += RUN_SPEED_PPS * game_framework.frame_time / 1.1
-                elif enemy.y > self.y:
-                    enemy.y -= RUN_SPEED_PPS * game_framework.frame_time / 1.1
+
+                enemy.add_event(SUCKED)
 
                 if enemy.dis_to_player <= 5:
-                    self.isBite = True
                     enemy.death_timer = 1
                     enemy.add_event(DAMAGED)
+                    enemy.x = -10000
+                    self.isBite = True
+                    self.add_event(BITE)
         
         self.jump()
 
@@ -317,10 +314,10 @@ class SUCK:
 
 # 3. 상태 변환 구현
 next_state = {
-    IDLE:  {RU: RUN,  LU: RUN,  RD: RUN,  LD: RUN, CD: SUCK, CU: IDLE},
+    IDLE:  {RU: RUN,  LU: RUN,  RD: RUN,  LD: RUN, CD: SUCK, CU: IDLE, BITE: IDLE},
     RUN:   {RU: IDLE, LU: IDLE, RD: IDLE, LD: IDLE, TIMER: DASH, CD: SUCK, CU: RUN},
     DASH:  {RU: IDLE, LU: IDLE, RD: IDLE, LD: IDLE, CD: SUCK},
-    SUCK:  {RU: IDLE, LU: IDLE, RD: RUN, LD: RUN}
+    SUCK:  {RU: IDLE, LU: IDLE, RD: RUN, LD: RUN, BITE: IDLE}
 }
 
 class Kirby:
@@ -333,6 +330,20 @@ class Kirby:
         self.frame = 0
         self.dir, self.diry, self.face_dir = 0, 0, 1
         self.image = load_image('resource/Default_Kirby.png')
+        #----------------------------------------------------
+        self.Life = load_image("resource/life_hud.png")
+        self.Life_0 = load_image("resource/0_hud.png")
+        self.Life_1 = load_image("resource/1_hud.png")
+        self.Life_2 = load_image("resource/2_hud.png")
+        self.Life_x = load_image("resource/x_hud.png")
+        self.Hp = load_image("resource/hp_hud.png")
+        self.lifes = 2
+        self.hps = 6
+        self.invincible = False
+        self.invincible_start_time = 0
+        self.invincible_end_time = 0
+        self.cnt = 0
+        #----------------------------------------------------
         self.event_que = []
         self.cur_state = IDLE
         self.cur_state.enter(self, None)
@@ -347,11 +358,14 @@ class Kirby:
         self.can_jump = False
         self.isCollide = 0
         self.star = []
-        self.life = 100
-        
+
     def update(self):
         self.gravity()
         self.cur_state.do(self)
+        self.invincible_end_time = time.time()
+        if self.invincible_end_time - self.invincible_start_time >= 3:
+            self.invincible = False
+
         if self.event_que:
             event = self.event_que.pop()
             self.cur_state.exit(self, event)
@@ -366,20 +380,37 @@ class Kirby:
         self.cur_state.draw(self)
         debug_print('pppp')
         debug_print(f'Face Dir: {self.face_dir}, Dir: {self.dir}')
-        draw_rectangle(*self.get_bb())
+        # draw_rectangle(*self.get_bb())
+
+        self.Life.draw(40, 420, 32, 25)
+
+        self.Life_x.draw(69, 419, 15.5, 16)
+
+        if self.lifes == 2:
+            self.Life_0.draw(90, 420, 16, 22)
+            self.Life_2.draw(106, 420, 16, 22)
+        if self.lifes == 1:
+            self.Life_0.draw(90, 420, 16, 22)
+            self.Life_1.draw(106, 420, 16, 22)
+        if self.lifes == 0:
+            self.Life_0.draw(90, 420, 16, 22)
+            self.Life_0.draw(106, 420, 16, 22)
+
+        for hp in range(self.hps):
+            self.Hp.draw(130 + hp * 18, 420, 18, 29.5)
 
     def add_event(self, event):
         self.event_que.insert(0, event)
 
     def gravity(self):
         if self.v <= 0:
-            F = -((RUN_SPEED_PPS * game_framework. frame_time)
+            F = -((RUN_SPEED_PPS * game_framework.frame_time)
                     * self.m * (self.v ** 2)) / 100
             self.y += round(F)
             self.v -= 1
             
         elif self.y > self.cur_floor:
-            F = -((RUN_SPEED_PPS * game_framework. frame_time)
+            F = -((RUN_SPEED_PPS * game_framework.frame_time)
                     * self.m * (self.v ** 2)) / 100
             self.y += round(F)
 
@@ -465,14 +496,35 @@ class Kirby:
         self.image_posY = image_posY
 
     def composite_draw(self):
-        if self.face_dir == 1:
-            self.image.clip_composite_draw(int(
-                self.frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, ' ', self.screen_x + self.tw, self.y + self.th + 5, (self.w + self.tw) * 2, (self.h + self.th) * 2)
-        else:
-            self.image.clip_composite_draw(int(
-                self.frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, 'h', self.screen_x + self.tw, self.y + self.th + 5, (self.w + self.tw) * 2, (self.h + self.th) * 2)
+        self.cnt += 1
+        if self.invincible:
+            if self.cnt % 2 == 0:
+                if self.face_dir == 1:
+                    self.image.clip_composite_draw(int(
+                        self.frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, ' ', self.screen_x + self.tw, self.y + self.th + 5, (self.w + self.tw) * 2, (self.h + self.th) * 2)
+                else:
+                    self.image.clip_composite_draw(int(
+                        self.frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, 'h', self.screen_x + self.tw, self.y + self.th + 5, (self.w + self.tw) * 2, (self.h + self.th) * 2)
+        elif not self.invincible:
+            if self.face_dir == 1:
+                self.image.clip_composite_draw(int(
+                    self.frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, ' ', self.screen_x + self.tw, self.y + self.th + 5, (self.w + self.tw) * 2, (self.h + self.th) * 2)
+            else:
+                self.image.clip_composite_draw(int(
+                    self.frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, 'h', self.screen_x + self.tw, self.y + self.th + 5, (self.w + self.tw) * 2, (self.h + self.th) * 2)
 
+    def damged(self, damage):
 
+        if not self.invincible:
+            self.invincible_start_time = time.time()
+            self.invincible = True
+            self.hps -= damage
+            if self.hps <= 0:
+                self.lifes -= 1
+                self.hps = 6
+        print(self.lifes)
+       
+        
     def fire_star(self):
         play_state.star.x = self.screen_x
         play_state.star.y = self.y
@@ -500,10 +552,14 @@ class Kirby:
                 self.isCollide = True
                 self.face_dir = -1
         if group == 'player:enemy':
-            self.life -= 1
-            if other.cur_state == ATTACK:
-                if int(other.frame) == 10:
-                    self.life -= 3
+            if self.cur_state != SUCK:
+                if other.cur_state == ATTACK:
+                    if int(other.frame) == 10:
+                        self.damged(3)
+                else:
+                    self.damged(1)
+    
+
 
                     
 

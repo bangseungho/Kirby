@@ -8,7 +8,6 @@ from kirby import Kirby
 from stage_1 import Stage
 from spark import Spark
 from star import Star
-from ball import Ball
 
 player = None
 stage = None
@@ -53,8 +52,8 @@ def exit():
     
 def update():
     for game_object in game_world.all_objects():
-        game_object.isCollide = False
         game_object.update()
+        game_object.isCollide = False
 
     for a, b, group in game_world.all_collision_pairs():
         if collide(a, b):

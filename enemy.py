@@ -4,18 +4,92 @@ import play_state
 import game_framework
 import player_speed
 import random
+import math
+import game_world
 
-TIMER, TURN, PATROL, DAMAGED = range(4)
-event_name = ['TIMER', 'TURN', 'PATROL', 'DAMAGED']
+TIMER, TURN, PATROL, DAMAGED, SUCKED = range(5)
+event_name = ['TIMER', 'TURN', 'PATROL', 'DAMAGED', 'SUCKED']
 
-class EnemyType(Enum):
+
+class Type(Enum):
     Spark = 0
     Laser = 1
     Hothead = 2
 
 
+class DEATH:
+    cnt = 0
+    @staticmethod
+    def enter(self, event):
+        self.frame = 0
+        if self.type == Type.Spark:
+            self.set_speed(1.5, 2)
+            self.set_image(24, 18, 166)
+        if self.type == Type.Laser:
+            self.set_speed(1.5, 1)
+            self.set_image(19, 19, 80)
+
+    @staticmethod
+    def exit(self, event):
+        pass
+
+    @staticmethod
+    def do(self):
+        self.face_dir = self.dir_damge
+
+        self.frame = (self.frame + self.FRAMES_PER_ACTION *
+                      self.ACTION_PER_TIME * game_framework.frame_time)
+
+        self.x += self.dir_damge / 10
+
+        self.death_timer -= 1
+
+        if self.death_timer == 0:
+            game_world.remove_object(self)
+
+    def draw(self):
+        DEATH.cnt += 1
+
+        if self.death_timer > 500:
+            self.scomposite_draw()
+        elif DEATH.cnt % 2 == 0:
+            self.scomposite_draw()
+
+
+
+class PULL:
+    def enter(self, event):
+        self.frame = 0
+        if self.type == Type.Spark:
+            self.set_speed(1.3, 1)
+            self.set_image(24, 18, 166)
+        if self.type == Type.Laser:
+            self.set_speed(1.5, 1)
+            self.set_image(19, 19, 80)
+
+    @staticmethod
+    def exit(self, event):
+        pass
+
+    @staticmethod
+    def do(self):
+        self.face_dir = -play_state.player.face_dir
+
+        if self.x < play_state.player.screen_x:
+            self.x += self.RUN_SPEED_PPS * game_framework.frame_time * 1.3
+        else:
+            self.x -= self.RUN_SPEED_PPS * game_framework.frame_time * 1.3
+        if self.y < play_state.player.y:
+            self.y += self.RUN_SPEED_PPS * game_framework.frame_time * 1.3
+        else:
+            self.y -= self.RUN_SPEED_PPS * game_framework.frame_time * 1.3
+
+    def draw(self):
+        self.scomposite_draw()
+
+
 class Enemy:
-    def __init__(self, x, y, w, h, image_posY, cur_state):
+    def __init__(self, x, y, w, h, image_posY, cur_state, TYPE):
         self.x, self.y = x, y
         self.w, self.h = w, h
         self.image_posY = image_posY
@@ -41,14 +115,10 @@ class Enemy:
         self.dir_damge = 0
         self.isSuck = False
         self.death_timer = 1000
+        self.type = TYPE
 
-    def update(self):
-        self.cur_state.do(self)
-
-        self.dis_to_player = abs(self.x - play_state.player.screen_x)
-        self.height_to_player = abs(self.y - play_state.player.y)
-
-        if play_state.player.dir != 0 and \
+    def with_player(self):
+       if play_state.player.dir != 0 and \
            play_state.player.x > 400 and play_state.player.x < 1600:
             if play_state.player.isDash == False:
                 self.x -= play_state.player.dir * \
@@ -57,7 +127,13 @@ class Enemy:
                 self.x -= play_state.player.dir * 2 * \
                     player_speed.RUN_SPEED_PPS * game_framework.frame_time
 
+    def update(self):
+        self.cur_state.do(self)
 
+        self.dis_to_player = abs(self.x - play_state.player.screen_x)
+        self.height_to_player = abs(self.y - play_state.player.y)
+
+        self.with_player()
 
         if self.event_que:
             event = self.event_que.pop()
@@ -68,6 +144,7 @@ class Enemy:
                 print(
                     f'ERROR: State {self.cur_state.__name__}    Event {self.event_name[event]}')
             self.cur_state.enter(self, event)
+
 
     def draw(self):
         self.cur_state.draw(self)

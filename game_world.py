@@ -1,6 +1,6 @@
 # objects[0] : 바닥 계층
 # objects[1] : 상위 계층
-objects = [[], []]
+objects = [[], [], []]
 
 collision_group = dict()
 
