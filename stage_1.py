@@ -81,10 +81,21 @@ class STAGE_1:
 class STAGE_2:
     @staticmethod
     def enter(self, event):
-        self.background_image = load_image('stage1_background.png')
-        self.land_image = load_image('stage2_land.png')
+        self.background_image = load_image('resource/stage1_background.png')
+        self.land_image = load_image('resource/stage1_land.png')
         self.next_portal = [600, 90, 650, 140]
-        self.prev_portal = [200, 90, 250, 140]
+        self.prev_portal = [0, 0, 0, 0]
+        self.add_obstacle(800, 38, 800, 30)
+        self.add_obstacle(2010, 200, 10, 100)
+        self.add_obstacle(582.5, 85, 24, 15)
+        self.add_obstacle(1157.5, 85, 89, 15)
+        self.add_obstacle(1695, 85, 303, 15)
+        self.add_obstacle(1605, 165, 30, 65)
+        self.add_obstacle(1647.5, 132, 14, 35)
+        self.add_enemy(3, Spark)
+        self.add_enemy(1, Laser)
+        self.add_enemy(1, Hothead)
+        game_world.add_objects(self.enemys, 1)
         print('ENTER STAGE2')
 
     @staticmethod
@@ -93,12 +104,29 @@ class STAGE_2:
 
     @staticmethod
     def do(self):
-        pass
+        play_state.player.x = clamp(0, play_state.player.x, 2000)
+        play_state.player.screen_x = clamp(20, play_state.player.screen_x, 780)
+
+        if play_state.player.x >= 400 and play_state.player.x < 1600 and play_state.player.can_move:
+            self.x = 400 - play_state.player.x
+
+            if play_state.player.dir != 0 and play_state.player.can_move:
+                if play_state.player.isDash == False:
+                    for ob in self.obstacles:
+                        ob.x -= play_state.player.dir * \
+                            RUN_SPEED_PPS * game_framework.frame_time
+                else:
+                    for ob in self.obstacles:
+                        ob.x -= play_state.player.dir * 2 * \
+                            RUN_SPEED_PPS * game_framework.frame_time
+
+        self.x = clamp(-1600, self.x, 0)
 
     @staticmethod
     def draw(self):
-        self.background_image.draw(500, 450 // 2, 1100, 450)
-        self.land_image.draw(1000, 253, 2000, 524)
+        self.background_image.clip_draw_to_origin(
+            0, 0, 1100, 450, self.x / 5, 0)
+        self.land_image.clip_draw_to_origin(0, 0, 2000, 300, self.x, -2)
 
 class STAGE_3:
     @staticmethod
@@ -191,6 +219,7 @@ class Stage:
             elif self.in_portal(player_x, player_y) == -1:
                 self.add_event(PREV)
         if event.type == SDL_KEYDOWN and event.key == SDLK_RIGHTBRACKET:
-            self.add_event(NEXT)
+            self.enemys.clear()
+            game_world.enemy_clear()
         if event.type == SDL_KEYDOWN and event.key == SDLK_LEFTBRACKET:
             self.add_event(PREV)

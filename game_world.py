@@ -19,13 +19,17 @@ def remove_object(o):
             remove_collision_object(o)
             del o
             return
-
-
+    raise ValueError('Trying destroy non existing object')
 def all_objects():
     for layer in objects:
         for o in layer:
             yield o  # 제네레이터, 모든 객체들을 하나씩 넘겨준다.
 
+def enemy_clear():
+    for o in all_objects():
+        if o.type == 2:
+            remove_object(o)
+    print(objects)
 
 def clear():
     for o in all_objects():
