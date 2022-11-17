@@ -26,9 +26,15 @@ def all_objects():
             yield o  # 제네레이터, 모든 객체들을 하나씩 넘겨준다.
 
 def enemy_clear():
-    for o in all_objects():
-        if o.type == 2:
-            remove_object(o)
+    while True:
+        flag = False
+        for o in all_objects():
+            if o.type == 2 or o.type == 3 or o.type == 4 or o.type == 6:
+                remove_object(o)
+                flag = True
+                break
+        if flag == False:
+            break
     print(objects)
 
 def clear():
