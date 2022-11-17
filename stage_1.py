@@ -6,6 +6,7 @@ from player_speed import *
 from spark import Spark
 from laser import Laser
 from hothead import Hothead
+from kirby import Kirby
 
 NEXT, PREV, UD = range(3)
 
@@ -29,6 +30,56 @@ class Obstacle:
 
 
 class STAGE_1:
+    @staticmethod
+    def enter(self, event):
+        self.background_image = load_image('resource/stage1_background.png')
+        self.land_image = load_image('resource/stage1_land.png')
+        self.next_portal = [600, 90, 650, 140]
+        self.prev_portal = [0, 0, 0, 0]
+        self.add_obstacle(800, 38, 800, 30)
+        self.add_obstacle(2010, 200, 10, 100)
+        self.add_obstacle(582.5, 85, 24, 15)
+        self.add_obstacle(1157.5, 85, 89, 15)
+        self.add_obstacle(1695, 85, 303, 15)
+        self.add_obstacle(1605, 165, 30, 65)
+        self.add_obstacle(1647.5, 132, 14, 35)
+        self.add_enemy(3, Spark)
+        self.add_enemy(1, Laser)
+        self.add_enemy(1, Hothead)
+        game_world.add_objects(self.enemys, 1)
+        print('ENTER STAGE1')
+
+    @staticmethod
+    def exit(self, event):
+        print('EXIT STAGE1')
+
+    @staticmethod
+    def do(self):
+        self.player.x = clamp(0, self.player.x, 2000)
+        self.player.screen_x = clamp(20, self.player.screen_x, 780)
+
+        if self.player.x >= 400 and self.player.x < 1600 and self.player.can_move:
+            self.x = 400 - self.player.x
+
+            if self.player.dir != 0 and self.player.can_move:
+                if self.player.isDash == False:
+                    for ob in self.obstacles:
+                        ob.x -= self.player.dir * \
+                            RUN_SPEED_PPS * game_framework.frame_time
+                else:
+                    for ob in self.obstacles:
+                        ob.x -= self.player.dir * 2 * \
+                            RUN_SPEED_PPS * game_framework.frame_time
+
+        self.x = clamp(-1600, self.x, 0)
+
+    @staticmethod
+    def draw(self):
+        self.background_image.clip_draw_to_origin(
+            0, 0, 1100, 450, self.x / 5, 0)
+        self.land_image.clip_draw_to_origin(0, 0, 2000, 300, self.x, -2)
+
+class STAGE_2:
     @staticmethod
     def enter(self, event):
         self.background_image = load_image('resource/stage1_background.png')
@@ -78,28 +129,6 @@ class STAGE_1:
             0, 0, 1100, 450, self.x / 5, 0)
         self.land_image.clip_draw_to_origin(0, 0, 2000, 300, self.x, -2)
 
-class STAGE_2:
-    @staticmethod
-    def enter(self, event):
-        self.background_image = load_image('stage1_background.png')
-        self.land_image = load_image('stage2_land.png')
-        self.next_portal = [600, 90, 650, 140]
-        self.prev_portal = [200, 90, 250, 140]
-        print('ENTER STAGE2')
-
-    @staticmethod
-    def exit(self, event):
-        print('EXIT STAGE2')
-
-    @staticmethod
-    def do(self):
-        pass
-
-    @staticmethod
-    def draw(self):
-        self.background_image.draw(500, 450 // 2, 1100, 450)
-        self.land_image.draw(1000, 253, 2000, 524)
-
 class STAGE_3:
     @staticmethod
     def enter(self, event):
@@ -140,16 +169,20 @@ class Stage:
         self.background_image = load_image('resource/stage1_background.png')
         self.land_image = load_image('resource/stage1_land.png')
         self.type = 0
+        self.player = Kirby()
+        game_world.add_object(self.player, 1)
+        game_world.add_collision_pairs(self.player, self.enemys, 'player:enemy')
+        game_world.add_collision_pairs(self.player, self.obstacles, 'player:ob')
         
     def update(self):
         self.cur_state.do(self)
         max = 0
         for ob in self.obstacles:
-            if play_state.player.screen_x > ob.x - ob.w - play_state.player.w + 10 and \
-               play_state.player.screen_x < ob.x + ob.w + play_state.player.w - 10:
+            if self.player.screen_x > ob.x - ob.w - self.player.w + 10 and \
+               self.player.screen_x < ob.x + ob.w + self.player.w - 10:
                 if ob.y + ob.h > max:
-                    max = ob.y + ob.h + play_state.player.h
-                play_state.player.cur_floor = max
+                    max = ob.y + ob.h + self.player.h
+                self.player.cur_floor = max
 
         if self.event_que:
             event = self.event_que.pop()
@@ -191,6 +224,8 @@ class Stage:
             elif self.in_portal(player_x, player_y) == -1:
                 self.add_event(PREV)
         if event.type == SDL_KEYDOWN and event.key == SDLK_RIGHTBRACKET:
+            game_world.clear()
+
             self.add_event(NEXT)
         if event.type == SDL_KEYDOWN and event.key == SDLK_LEFTBRACKET:
             self.add_event(PREV)

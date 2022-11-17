@@ -72,13 +72,13 @@ class PULL:
 
     @staticmethod
     def do(self):
-        self.face_dir = -play_state.player.face_dir
+        self.face_dir = -play_state.stage.player.face_dir
 
-        if self.x < play_state.player.screen_x:
+        if self.x < play_state.stage.player.screen_x:
             self.x += self.RUN_SPEED_PPS * game_framework.frame_time * 1.3
         else:
             self.x -= self.RUN_SPEED_PPS * game_framework.frame_time * 1.3
-        if self.y < play_state.player.y:
+        if self.y < play_state.stage.player.y:
             self.y += self.RUN_SPEED_PPS * game_framework.frame_time * 1.3
         else:
             self.y -= self.RUN_SPEED_PPS * game_framework.frame_time * 1.3
@@ -116,20 +116,20 @@ class Enemy:
         self.type = TYPE
 
     def with_player(self):
-       if play_state.player.dir != 0 and \
-           play_state.player.x > 400 and play_state.player.x < 1600:
-            if play_state.player.isDash == False:
-                self.x -= play_state.player.dir * \
+       if play_state.stage.player.dir != 0 and \
+           play_state.stage.player.x > 400 and play_state.stage.player.x < 1600:
+            if play_state.stage.player.isDash == False:
+                self.x -= play_state.stage.player.dir * \
                     player_speed.RUN_SPEED_PPS * game_framework.frame_time
             else:
-                self.x -= play_state.player.dir * 2 * \
+                self.x -= play_state.stage.player.dir * 2 * \
                     player_speed.RUN_SPEED_PPS * game_framework.frame_time
 
     def update(self):
         self.cur_state.do(self)
 
-        self.dis_to_player = abs(self.x - play_state.player.screen_x)
-        self.height_to_player = abs(self.y - play_state.player.y)
+        self.dis_to_player = abs(self.x - play_state.stage.player.screen_x)
+        self.height_to_player = abs(self.y - play_state.stage.player.y)
 
         self.with_player()
 

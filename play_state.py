@@ -24,7 +24,6 @@ class Type(Enum):
 
 
 
-player = None
 stage = None
 star = None
 
@@ -39,25 +38,20 @@ def handle_events():
             else:
                 game_framework.quit()
         else:
-            player.handle_event(event)
-            stage.move_stage(event, player.x, player.y)
+            stage.player.handle_event(event)
+            stage.move_stage(event, stage.player.x, stage.player.y)
 
 # 초기화
 def enter():
-    global player
     global stage
     global star
     # global enemys
     stage = Stage()
-    player = Kirby()
     star = Star()
     game_world.add_object(stage, 0)
     game_world.add_object(star, 1)
-    game_world.add_object(player, 1)
 
     # 충돌 대상 정보 등록
-    game_world.add_collision_pairs(player, stage.enemys, 'player:enemy')
-    game_world.add_collision_pairs(player, stage.obstacles, 'player:ob')
     game_world.add_collision_pairs(star, stage.enemys, 'star:enemy')
     game_world.add_collision_pairs(star, stage.obstacles, 'star:ob')
     game_world.add_collision_pairs(stage.obstacles, stage.enemys, 'enemy:ob')
