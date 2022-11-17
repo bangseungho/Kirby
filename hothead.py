@@ -19,6 +19,7 @@ class Fire:
         self.ACTION_PER_TIME = 1.5
         self.timer = 1400
         self.re_frame = [8, 9, 2, 3, 7, 5, 0, 6, 4, 1]
+        self.type = 7
 
     def draw(self):
         if self.face_dir == 1:
@@ -29,7 +30,7 @@ class Fire:
             for i in range(9):
                 self.image.clip_composite_draw(int(
                     self.re_frame[i]) * self.w, 0, self.w, self.h, 0, 'h', self.x + self.face_dir * 63, self.y, self.w * 1.5, self.h * 1.5)
-        draw_rectangle(*self.get_bb())
+
 
     def get_bb(self):
         if self.face_dir == -1:
@@ -39,8 +40,6 @@ class Fire:
 
     def update(self):
         self.timer -= 1
-        if self.timer == 0:
-            game_world.remove_object(self)
 
         for i in range(9):
             self.re_frame[i] = (self.re_frame[i] + self.FRAMES_PER_ACTION *
@@ -49,8 +48,7 @@ class Fire:
         Enemy.with_player(self)
 
     def handle_collision(self, other, group):
-        print("HHHHHHHHHHHHHHHHHHHH")
-
+        other.damaged(3)
 
 class RUN:
     @staticmethod
@@ -71,6 +69,13 @@ class RUN:
                       self.ACTION_PER_TIME * game_framework.frame_time) % self.FRAMES_PER_ACTION
         self.x += self.dir * self.RUN_SPEED_PPS * game_framework.frame_time
         self.timer -= 1
+
+        if self.y > self.py:
+            self.y = self.py
+            self.y -= 1
+        if self.y < self.py:
+            self.y = self.py
+
         if self.timer == 0:
             self.add_event(TIMER)
 
@@ -88,8 +93,10 @@ class ATTACK:
 
     @staticmethod
     def exit(self, event):
-        pass
-    
+        for game_object in game_world.all_objects():
+            if game_object.type == 7:
+                game_world.remove_object(game_object)
+
     @staticmethod
     def do(self):
         self.frame = (self.frame + self.FRAMES_PER_ACTION *
@@ -104,10 +111,19 @@ class ATTACK:
         if int(self.frame) == 5:
             self.frame = 3
 
+        if self.y > self.py:
+            self.y = self.py
+            self.y -= 1
+        if self.y < self.py:
+            self.y = self.py
+
+
         self.timer -= 1
         if self.timer == 0:
             self.add_event(TIMER)
-  
+
+
+
     def draw(self):
         self.scomposite_draw()
 
@@ -115,7 +131,7 @@ class Hothead(Enemy):
     image = None
 
     def __init__(self):
-        super(Hothead, self).__init__(1000, 90, 22, 21, 0, RUN, Type.Hothead)
+        super(Hothead, self).__init__(1900, 125, 22, 21, 0, RUN, 4)
         if Hothead.image == None:
             Hothead.image = load_image("resource/hothead.png")
         self.beam_start_time = 0
@@ -129,7 +145,8 @@ class Hothead(Enemy):
         self.set_speed(0.8, 5)
         self.set_image(22, 21, 0)
         self.timer = 1000
-        self.dir = -1
+        self.dir = 1
+        self.py = self.y
 
     def scomposite_draw(self):
         if self.face_dir == 1:
@@ -142,9 +159,11 @@ class Hothead(Enemy):
     def fire_hotfire(self):
         fires = Fire(self.x, self.y, self.face_dir)
         game_world.add_object(fires, 0)
-        game_world.add_collision_pairs(fires, self, 'hothead:fire')
+        game_world.add_collision_pairs(fires, play_state.player, 'player:fire')
 
     def handle_collision(self, other, group):
         if group == 'star:enemy':
             self.add_event(DAMAGED)
             self.dir_damge = other.face_dir
+        if group == 'enemy:ob':
+            self.dir *= -1

@@ -13,6 +13,7 @@ class beam_laser:
         self.x = x
         self.v = 100
         self.y = y
+        self.type = 8
 
     def draw(self):
         self.image.draw(self.x - 50, self.y, 64, 8)
@@ -73,7 +74,7 @@ class Laser(Enemy):
     image = None
 
     def __init__(self):
-        super(Laser, self).__init__(1550, 140, 24, 19, 0, ATTACK, Type.Laser)
+        super(Laser, self).__init__(1550, 140, 24, 19, 0, ATTACK, 3)
         if Laser.image == None:
             Laser.image = load_image("resource/laser.png")
         self.beam_start_time = 0

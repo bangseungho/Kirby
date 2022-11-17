@@ -117,7 +117,7 @@ class Spark(Enemy):
     image = None
 
     def __init__(self):
-        super(Spark, self).__init__(random.randint(800, 1000), 90, 24, 19, 0, RUN, Type.Spark)
+        super(Spark, self).__init__(random.randint(800, 1000), 90, 24, 19, 0, RUN, 2)
         if Spark.image == None:
             Spark.image = load_image("resource/spark.png")
         self.temp_dir = 1
@@ -125,7 +125,7 @@ class Spark(Enemy):
         self.next_state = {
             RUN:  { TIMER: JUMP, PATROL: ATTACK, DAMAGED: DEATH, SUCKED: PULL },
             JUMP: { TURN: RUN, PATROL: ATTACK, DAMAGED: DEATH, SUCKED: PULL },
-            ATTACK: { TURN: RUN, DAMAGED: DEATH, SUCKED: PULL },
+            ATTACK: { TURN: RUN, DAMAGED: DEATH, SUCKED: PULL, PATROL: RUN},
             DEATH : { TURN: DEATH, PATROL: DEATH, DAMAGED: DEATH, SUCKED: DEATH },
             PULL : { TURN: RUN, PATROL: RUN, DAMAGED: DEATH, SUCKED: PULL }
         }
@@ -141,8 +141,7 @@ class Spark(Enemy):
     def handle_collision(self, other, group):
         if group == 'enemy:ob':
             self.dir *= -1
-            self.timer = random.randint(200, 600)
-            self.y = other.y + other.h + self.h / 2
+            self.timer = random.randint(200, 400)
         if group == 'star:enemy':
             self.add_event(DAMAGED)
             self.dir_damge = other.face_dir

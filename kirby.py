@@ -88,7 +88,7 @@ class IDLE:
                     if self.frame > 5:
                         self.frame = 5
                     self.set_speed(0.8, 5)
-                    self.set_image(24, 24, 408, 7, 7)
+                    self.set_image(24, 25, 408, 7, 7)
                 else:
                     if self.v > 0:
                         self.frame = 0
@@ -175,7 +175,7 @@ class RUN:
                     if self.frame > 5:
                         self.frame = 5
                     self.set_speed(0.8, 5)
-                    self.set_image(24, 24, 408, 7, 7) # 바꿀거
+                    self.set_image(24, 25, 408, 7, 7) # 바꿀거
                 else:
                     if self.v > 0:
                         self.frame = 0
@@ -358,6 +358,7 @@ class Kirby:
         self.can_jump = False
         self.isCollide = 0
         self.star = []
+        self.type = 1
 
     def update(self):
         self.gravity()
@@ -522,8 +523,6 @@ class Kirby:
             if self.hps <= 0:
                 self.lifes -= 1
                 self.hps = 6
-        print(self.lifes)
-       
         
     def fire_star(self):
         play_state.star.x = self.screen_x

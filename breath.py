@@ -12,6 +12,7 @@ class Breath:
             Breath.image = load_image('resource/breath.png')
         self.x, self.y, self.velocity = x + 1 * velocity * 20, y, velocity
         self.face_dir = face
+        self.type = 6
 
     def draw(self):
         if self.face_dir == 1:

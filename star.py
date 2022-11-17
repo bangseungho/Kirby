@@ -14,7 +14,7 @@ class Star:
     rotate = 0
     frame = 0
 
-    def __init__(self, x=400, y=300, velocity=1):
+    def __init__(self, x=2000, y=3000, velocity=1):
         if Star.image == None:
             Star.image = load_image('resource/star.png')
         if Star.effect == None:
@@ -28,6 +28,7 @@ class Star:
         self.isCrush = False
         self.face_dir = 1
         self.cframe = 0
+        self.type = 5
 
     def draw(self):
         if self.isFire:

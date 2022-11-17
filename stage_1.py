@@ -36,6 +36,7 @@ class STAGE_1:
         self.next_portal = [600, 90, 650, 140]
         self.prev_portal = [0, 0, 0, 0]
         self.add_obstacle(800, 38, 800, 30)
+        self.add_obstacle(2010, 200, 10, 100)
         self.add_obstacle(582.5, 85, 24, 15)
         self.add_obstacle(1157.5, 85, 89, 15)
         self.add_obstacle(1695, 85, 303, 15)
@@ -138,6 +139,7 @@ class Stage:
         self.prev_portal = [0, 0, 0, 0]
         self.background_image = load_image('resource/stage1_background.png')
         self.land_image = load_image('resource/stage1_land.png')
+        self.type = 0
         
     def update(self):
         self.cur_state.do(self)
@@ -161,8 +163,8 @@ class Stage:
 
     def draw(self):
         self.cur_state.draw(self)
-        for ob in self.obstacles:
-            draw_rectangle(ob.x - ob.w, ob.y - ob.h, ob.x + ob.w, ob.y + ob.h)
+        # for ob in self.obstacles:
+        #     draw_rectangle(ob.x - ob.w, ob.y - ob.h, ob.x + ob.w, ob.y + ob.h)
     
     def add_obstacle(self, x, y, w, h):
         self.obstacles.append(Obstacle(x, y, w, h))

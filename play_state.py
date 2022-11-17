@@ -9,6 +9,20 @@ from stage_1 import Stage
 from spark import Spark
 from star import Star
 from hothead import Fire
+from enum import Enum
+
+class Type(Enum):
+    Stage = 0
+    Kirby = 1
+    Spark = 2
+    Laser = 3
+    Hothead = 4
+    Star = 5
+    Breath = 6
+    Fire = 7
+    Beam_Laser = 8
+
+
 
 player = None
 stage = None
@@ -38,9 +52,8 @@ def enter():
     player = Kirby()
     star = Star()
     game_world.add_object(stage, 0)
+    game_world.add_object(star, 1)
     game_world.add_object(player, 1)
-    game_world.add_object(star, 1)
-    game_world.add_object(star, 1)
 
     # 충돌 대상 정보 등록
     game_world.add_collision_pairs(player, stage.enemys, 'player:enemy')

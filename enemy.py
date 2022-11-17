@@ -10,25 +10,18 @@ import game_world
 TIMER, TURN, PATROL, DAMAGED, SUCKED = range(5)
 event_name = ['TIMER', 'TURN', 'PATROL', 'DAMAGED', 'SUCKED']
 
-
-class Type(Enum):
-    Spark = 0
-    Laser = 1
-    Hothead = 2
-
-
 class DEATH:
     cnt = 0
     @staticmethod
     def enter(self, event):
         self.frame = 0
-        if self.type == Type.Spark:
+        if self.type == 2:
             self.set_speed(1.5, 2)
             self.set_image(24, 18, 166)
-        if self.type == Type.Laser:
+        if self.type == 3:
             self.set_speed(1.5, 1)
             self.set_image(19, 19, 80)
-        if self.type == Type.Hothead:
+        if self.type == 4:
             self.set_speed(1.5, 1)
             self.set_image(23, 21, 84)
 
@@ -63,13 +56,13 @@ class DEATH:
 class PULL:
     def enter(self, event):
         self.frame = 0
-        if self.type == Type.Spark:
+        if self.type == 2:
             self.set_speed(1.3, 1)
             self.set_image(24, 18, 166)
-        if self.type == Type.Laser:
+        if self.type == 3:
             self.set_speed(1.5, 1)
             self.set_image(19, 19, 80)
-        if self.type == Type.Hothead:
+        if self.type == 4:
             self.set_speed(1.5, 1)
             self.set_image(23, 21, 84)
             
@@ -155,7 +148,7 @@ class Enemy:
         self.cur_state.draw(self)
         debug_print('pppp')
         debug_print(f'Face Dir: {self.face_dir}, Dir: {self.dir}')
-        draw_rectangle(*self.get_bb())
+        # draw_rectangle(*self.get_bb())
 
     def add_event(self, event):
         self.event_que.insert(0, event)
