@@ -29,8 +29,8 @@ class RUN:
         if self.y < 90:
             self.y = 90
 
-        if self.dis_to_player <= 100 and self.y > play_state.stage.player.y:
-            if self.x < play_state.stage.player.screen_x:
+        if self.dis_to_player <= 100 and self.y > play_state.player.y:
+            if self.x < play_state.player.screen_x:
                 self.dir = 1
             else:
                 self.dir = -1

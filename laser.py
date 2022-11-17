@@ -45,7 +45,7 @@ class ATTACK:
     def do(self):
         self.beam_end_time = time.time()
 
-        if self.dis_to_player <= 280 and play_state.stage.player.screen_x < self.x:
+        if self.dis_to_player <= 280 and play_state.player.screen_x < self.x:
             if self.beam_end_time - self.beam_start_time >= 1:
                 self.frame = 0
                 self.face_dir = -1
@@ -100,7 +100,7 @@ class Laser(Enemy):
     def fire_beam_laser(self):
         self.beams.append(beam_laser(self.x, self.y))
         game_world.add_objects(self.beams, 1)
-        game_world.add_collision_pairs(self.beams, play_state.stage.player, 'beams:player')
+        game_world.add_collision_pairs(self.beams, play_state.player, 'beams:player')
 
     def handle_collision(self, other, group):
         if group == 'star:enemy':

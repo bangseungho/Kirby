@@ -55,13 +55,13 @@ class Star:
 
         Enemy.with_player(self)
 
-        if play_state.stage.player.dir != 0 and \
-           play_state.stage.player.x > 400 and play_state.stage.player.x < 1600:
-            if play_state.stage.player.isDash == False:
-                self.cx -= play_state.stage.player.dir * \
+        if play_state.player.dir != 0 and \
+           play_state.player.x > 400 and play_state.player.x < 1600:
+            if play_state.player.isDash == False:
+                self.cx -= play_state.player.dir * \
                                 player_speed.RUN_SPEED_PPS * game_framework.frame_time
             else:
-                self.cx -= play_state.stage.player.dir * 2 *\
+                self.cx -= play_state.player.dir * 2 *\
                                 player_speed.RUN_SPEED_PPS * game_framework.frame_time
 
         if self.x < 400:
