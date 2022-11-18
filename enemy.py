@@ -11,22 +11,22 @@ TIMER, TURN, PATROL, DAMAGED, SUCKED = range(5)
 event_name = ['TIMER', 'TURN', 'PATROL', 'DAMAGED', 'SUCKED']
 
 class DEATH:
-    cnt = 0
     @staticmethod
     def enter(self, event):
         self.frame = 0
         if self.type == 2:
-            self.set_speed(1.5, 2)
+            self.set_speed(3, 2)
             self.set_image(24, 18, 166)
         if self.type == 3:
-            self.set_speed(1.5, 1)
+            self.set_speed(3, 1)
             self.set_image(19, 19, 80)
         if self.type == 4:
-            self.set_speed(1.5, 1)
+            self.set_speed(3, 1)
             self.set_image(23, 21, 84)
 
     @staticmethod
     def exit(self, event):
+        self.isDeath = True
         pass
 
     @staticmethod
@@ -34,7 +34,7 @@ class DEATH:
         self.face_dir = self.dir_damge
 
         self.frame = (self.frame + self.FRAMES_PER_ACTION *
-                      self.ACTION_PER_TIME * game_framework.frame_time)
+                      self.ACTION_PER_TIME * game_framework.frame_time) % self.FRAMES_PER_ACTION
 
         self.x += self.dir_damge / 10
 
@@ -44,11 +44,10 @@ class DEATH:
             game_world.remove_object(self)
 
     def draw(self):
-        DEATH.cnt += 1
-
+        print(self.death_timer)
         if self.death_timer > 500:
             self.scomposite_draw()
-        elif DEATH.cnt % 2 == 0:
+        elif self.death_timer % 2 == 0:
             self.scomposite_draw()
 
 
@@ -114,6 +113,8 @@ class Enemy:
         self.isSuck = False
         self.death_timer = 1000
         self.type = TYPE
+        self.isDeath = False
+        self.death_cnt = 0
 
     def with_player(self):
        if play_state.player.dir != 0 and \
@@ -149,6 +150,14 @@ class Enemy:
         debug_print('pppp')
         debug_print(f'Face Dir: {self.face_dir}, Dir: {self.dir}')
         # draw_rectangle(*self.get_bb())
+    
+    def scomposite_draw(self):
+        if self.face_dir == 1:
+            self.image.clip_composite_draw(int(
+                self.frame) * self.w, self.image_posY, self.w, self.h, 0, ' ', self.x, self.y, self.w * 2, self.h * 2)
+        else:
+            self.image.clip_composite_draw(int(
+                self.frame) * self.w, self.image_posY, self.w, self.h, 0, 'h', self.x, self.y, self.w * 2, self.h * 2)
 
     def add_event(self, event):
         self.event_que.insert(0, event)

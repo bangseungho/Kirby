@@ -25,9 +25,9 @@ class Ability(Enum):
     Fire = 3
 
 # 1 : 이벤트 정의
-RD, LD, RU, LU, TIMER, CD, CU, BITE, TRANS = range(9)
+RD, LD, RU, LU, TIMER, CD, CU, BITE, TRANS, AATTACK = range(10)
 
-event_name = ['RD', 'LD', 'RU', 'LU', 'TIMER', 'CD', 'CU', 'BITE', 'TRANS']
+event_name = ['RD', 'LD', 'RU', 'LU', 'TIMER', 'CD', 'CU', 'BITE', 'TRANS', 'AATTACK']
 
 key_event_table = {
     (SDL_KEYDOWN, SDLK_RIGHT): RD,
@@ -150,7 +150,6 @@ class RUN:
 
         if self.timer > 0 and self.isBite == False and self.face_dir == self.prev_event:
             self.add_event(TIMER)
-
         self.jump()
 
     def draw(self):
@@ -262,52 +261,55 @@ class SUCK:
 
     @staticmethod
     def enter(self, event):
+        print('ENTER SUCK')
+        if self.ability != Ability.Defualt:
+            self.add_event(AATTACK)
         self.set_speed(0.3, 5)
         self.frame = 0
         self.dir = 0
 
     @staticmethod
     def exit(self, event):
-        if PREV == IDLE:
-            self.cur_state = IDLE
-        elif PREV == RUN:
-            if self.face_dir == 1:
-                self.dir += 1
-            else:
-                self.dir -= 1
-            self.cur_state = RUN
-        for enemy in play_state.stage.enemys:
-            if enemy.cur_state == PULL:
-                enemy.add_event(TURN)
-
-        self.timer = 0
+        if self.ability == Ability.Defualt:
+            if PREV == IDLE:
+                self.cur_state = IDLE
+            elif PREV == RUN:
+                if self.face_dir == 1:
+                    self.dir += 1
+                else:
+                    self.dir -= 1
+                self.cur_state = RUN
+            for enemy in play_state.stage.enemys:
+                if enemy.cur_state == PULL:
+                    enemy.add_event(TURN)
+            self.timer = 0
         print('EXIT SUCK')
 
     @staticmethod
     def do(self):
-        self.frame = (self.frame + FRAMES_PER_ACTION *
-                      ACTION_PER_TIME * game_framework.frame_time)
-        SUCK.range = [self.screen_x - 50 + 50 * self.face_dir, self.y -
-                      22, self.screen_x + 50 + 50 * self.face_dir, self.y + 22]
+        if self.ability == Ability.Defualt:
+            self.frame = (self.frame + FRAMES_PER_ACTION *
+                        ACTION_PER_TIME * game_framework.frame_time)
+            SUCK.range = [self.screen_x - 50 + 50 * self.face_dir, self.y -
+                        22, self.screen_x + 50 + 50 * self.face_dir, self.y + 22]
 
-        for enemy in play_state.stage.enemys:
-            if SUCK.range[RIGHT] > enemy.x - enemy.w and \
-               SUCK.range[LEFT] < enemy.x + enemy.w and \
-               SUCK.range[TOP] > enemy.y - enemy.h and \
-               SUCK.range[BOTTOM] < enemy.y + enemy.h:
+            for enemy in play_state.stage.enemys:
+                if SUCK.range[RIGHT] > enemy.x - enemy.w and \
+                SUCK.range[LEFT] < enemy.x + enemy.w and \
+                SUCK.range[TOP] > enemy.y - enemy.h and \
+                SUCK.range[BOTTOM] < enemy.y + enemy.h:
 
-                enemy.add_event(SUCKED)
+                    enemy.add_event(SUCKED)
 
-                if enemy.dis_to_player <= 5:
-                    self.bite_enemy_type = enemy.type
-                    enemy.death_timer = 1
-                    enemy.add_event(DAMAGED)
-                    enemy.x = -10000
-                    self.isBite = True
-                    self.add_event(BITE)
+                    if enemy.dis_to_player <= 5:
+                        self.bite_enemy_type = enemy.type
+                        enemy.death_timer = 1
+                        enemy.add_event(DAMAGED)
+                        enemy.x = -10000
+                        self.isBite = True
+                        self.add_event(BITE)
 
-        self.jump()
-
+            self.jump()
     @staticmethod
     def draw(self):
         if int(self.frame) == 5:
@@ -364,14 +366,61 @@ class TRANSFORM:
         self.set_image(80, 80, 0, 0, 0)
         self.ecomposite_draw(self.effect)
 
+class ABILITY:
+    @staticmethod
+    def enter(self, event):
+        print('ENTER ABILITY')
+        self.v = 1
+        match(self.ability):
+            case Ability.Spark:
+                self.set_speed(0.5, 11)
+                self.set_image(64, 74, 258, 0, 0)
+            case Ability.Laser:
+                pass
+            case Ability.Fire:
+                pass
+
+        self.frame = 0
+
+    @staticmethod
+    def exit(self, event):
+        self.v = 150
+        if PREV == RUN:
+            if event == RD:
+                self.dir += 1
+            elif event == LD:
+                self.dir -= 1
+            elif event == CU:
+                if self.face_dir == 1:
+                    self.dir = 1
+                else:
+                    self.dir = -1
+            self.cur_state = RUN
+            self.timer = 0
+        print('EXIT ABILITY')
+       
+    @staticmethod
+    def do(self):
+        self.frame = (self.frame + FRAMES_PER_ACTION *
+                      ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
+        if int(self.frame) == 10:
+            self.frame = 1
+        
+    @staticmethod
+    def draw(self):
+        self.composite_draw()
+        pass
+
+
 
 # 3. 상태 변환 구현
 next_state = {
     IDLE:  {RU: RUN,  LU: RUN,  RD: RUN,  LD: RUN, CD: SUCK, CU: IDLE, BITE: IDLE, TRANS: TRANSFORM},
     RUN:   {RU: IDLE, LU: IDLE, RD: IDLE, LD: IDLE, TIMER: DASH, CD: SUCK, CU: RUN, TRANS: TRANSFORM},
     DASH:  {RU: IDLE, LU: IDLE, RD: IDLE, LD: IDLE, CD: SUCK, TRANS: TRANSFORM},
-    SUCK:  {RU: IDLE, LU: IDLE, RD: RUN, LD: RUN, BITE: IDLE},
-    TRANSFORM: {TIMER: IDLE}
+    SUCK:  {AATTACK: ABILITY, RU: IDLE, LU: IDLE, RD: RUN, LD: RUN, BITE: IDLE},
+    TRANSFORM: {TIMER: IDLE},
+    ABILITY: {CU: IDLE, RU: IDLE, LU: IDLE, RD: RUN, LD: RUN,}
 }
 
 
@@ -433,7 +482,7 @@ class Kirby:
                 # 에러가 발생했으면, 그때 상태와 이벤트를 출력해본다.
                 print(self.cur_state, event_name[event])
             self.cur_state.enter(self, event)
-
+ 
     def draw(self):
         self.cur_state.draw(self)
         debug_print('pppp')
@@ -600,9 +649,10 @@ class Kirby:
         game_world.add_object(breath, 1)
 
     def get_bb(self):
+        if self.cur_state == ABILITY:
+            return self.screen_x - 60, self.y -60, self.screen_x + 60, self.y + 60
         return self.screen_x - 20, self.y - 20, \
             self.screen_x + 20, self.y + 20
-
     def handle_collision(self, other, group):
         if group == 'player:ob':
             if self.dir == 1 and self.face_dir == 1 and self.screen_x < other.x and \
@@ -617,8 +667,10 @@ class Kirby:
                 self.face_dir = -1
         if group == 'player:enemy':
             if self.cur_state != SUCK:
-                if other.cur_state == ATTACK:
-                    if int(other.frame) == 10:
-                        self.damaged(3)
-                else:
-                    self.damaged(1)
+                if self.cur_state != ABILITY:
+                    if other.cur_state == ATTACK:
+                        if int(other.frame) == 10:
+                            self.damaged(3)
+                    else:
+                        self.damaged(1)
+            

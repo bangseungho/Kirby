@@ -1,6 +1,7 @@
 from pico2d import *
 from enemy import *
 from enum import Enum
+import kirby 
 import random
 import game_framework
 import game_world
@@ -148,14 +149,6 @@ class Hothead(Enemy):
         self.dir = 1
         self.py = self.y
 
-    def scomposite_draw(self):
-        if self.face_dir == 1:
-            self.image.clip_composite_draw(int(
-                self.frame) * self.w, self.image_posY, self.w, self.h, 0, ' ', self.x, self.y, self.w * 2, self.h * 2)
-        if self.face_dir == -1:
-            self.image.clip_composite_draw(int(
-                self.frame) * self.w, self.image_posY, self.w, self.h, 0, 'h', self.x, self.y, self.w * 2, self.h * 2)
-
     def fire_hotfire(self):
         fires = Fire(self.x, self.y, self.face_dir)
         game_world.add_object(fires, 0)
@@ -167,3 +160,10 @@ class Hothead(Enemy):
             self.dir_damge = other.face_dir
         if group == 'enemy:ob':
             self.dir *= -1
+        if group == 'player:enemy':
+            if other.cur_state == kirby.ABILITY and not self.isDeath:
+                self.add_event(DAMAGED)
+                if self.x < other.screen_x:
+                    self.dir_damge = -1
+                else:
+                    self.dir_damge = 1

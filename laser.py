@@ -1,6 +1,7 @@
 from pico2d import *
 from enemy import *
 from enum import Enum
+import kirby
 import random
 import game_framework
 import game_world
@@ -44,17 +45,14 @@ class ATTACK:
     @staticmethod
     def do(self):
         self.beam_end_time = time.time()
-
         if self.dis_to_player <= 280 and play_state.player.screen_x < self.x:
             if self.beam_end_time - self.beam_start_time >= 1:
                 self.frame = 0
-                self.face_dir = -1
                 self.set_speed(1.0, 13)
                 self.set_image(35, 21, 38)
                 self.fire_beam_laser()
                 self.beam_start_time = time.time()
         else:
-            self.face_dir = -1
             self.set_speed(1.3, 3)
             self.set_image(19, 19, 19)
 
@@ -86,16 +84,9 @@ class Laser(Enemy):
         }
         self.set_speed(1.3, 3)
         self.set_image(19, 19, 19)
+        self.face_dir = 1
         self.beams = []
         self.dir_y = 1
-
-    def scomposite_draw(self):
-        if self.face_dir == 1:
-            self.image.clip_composite_draw(int(
-                self.frame) * self.w, self.image_posY, self.w, self.h, 0, 'h', self.x, self.y, self.w * 2, self.h * 2)
-        if self.face_dir == -1:
-            self.image.clip_composite_draw(int(
-                self.frame) * self.w, self.image_posY, self.w, self.h, 0, ' ', self.x, self.y, self.w * 2, self.h * 2)
 
     def fire_beam_laser(self):
         self.beams.append(beam_laser(self.x, self.y))
@@ -106,3 +97,10 @@ class Laser(Enemy):
         if group == 'star:enemy':
             self.add_event(DAMAGED)
             self.dir_damge = other.face_dir
+        if group == 'player:enemy':
+            if other.cur_state == kirby.ABILITY and not self.isDeath:
+                self.add_event(DAMAGED)
+                if self.x < other.screen_x:
+                    self.dir_damge = -1
+                else:
+                    self.dir_damge = 1
