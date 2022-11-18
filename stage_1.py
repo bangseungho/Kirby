@@ -191,8 +191,8 @@ class Stage:
 
     def draw(self):
         self.cur_state.draw(self)
-        for ob in self.obstacles:
-            draw_rectangle(ob.x - ob.w, ob.y - ob.h, ob.x + ob.w, ob.y + ob.h)
+        # for ob in self.obstacles:
+        #     draw_rectangle(ob.x - ob.w, ob.y - ob.h, ob.x + ob.w, ob.y + ob.h)
     
     def add_obstacle(self, x, y, w, h):
         self.obstacles.append(Obstacle(x, y, w, h))

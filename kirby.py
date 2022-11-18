@@ -318,8 +318,8 @@ class SUCK:
         if int(self.frame) == 5:
             self.frame = 2
         self.set_image(25, 22, 270, 0, 0)
-        draw_rectangle(SUCK.range[LEFT], SUCK.range[BOTTOM],
-                       SUCK.range[RIGHT], SUCK.range[TOP])
+        # draw_rectangle(SUCK.range[LEFT], SUCK.range[BOTTOM],
+        #                SUCK.range[RIGHT], SUCK.range[TOP])
         self.composite_draw()
 
 
@@ -505,7 +505,7 @@ class Kirby:
         self.cur_state.draw(self)
         debug_print('pppp')
         debug_print(f'Face Dir: {self.face_dir}, Dir: {self.dir}')
-        draw_rectangle(*self.get_bb())
+        # draw_rectangle(*self.get_bb())
 
         self.Life.draw(40, 420, 32, 25)
 
@@ -573,6 +573,15 @@ class Kirby:
             key_event = key_event_table[(event.type, event.key)]
             self.add_event(key_event)
         if event.type == SDL_KEYDOWN:
+            if event.key == SDLK_1:
+                self.ability = Ability.Defualt
+                self.image = load_image('resource/Default_Kirby.png')
+            if event.key == SDLK_2:
+                self.ability = Ability.Spark
+                self.image = load_image('resource/Spark_Kirby.png')
+            if event.key == SDLK_3:
+                self.ability = Ability.Laser
+                self.image = load_image('resource/Laser_Kirby.png')
             if event.key == SDLK_SPACE:
                 self.can_jump = True
                 if self.isJump == 0:
