@@ -167,3 +167,6 @@ class Hothead(Enemy):
                     self.dir_damge = -1
                 else:
                     self.dir_damge = 1
+        if group == 'kbeam:enemy':
+            self.add_event(DAMAGED)
+            self.dir_damge = other.face_dir

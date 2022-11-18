@@ -10,6 +10,7 @@ from spark import Spark
 from star import Star
 from hothead import Fire
 from enum import Enum
+from beam import KBeam
 
 class Type(Enum):
     Stage = 0
@@ -21,12 +22,14 @@ class Type(Enum):
     Breath = 6
     Fire = 7
     Beam_Laser = 8
+    KBeam_Laser = 9
 
 
 
 player = None
 stage = None
 star = None
+kbeam = None
 
 def handle_events():
     events = get_events()
@@ -47,13 +50,16 @@ def enter():
     global player
     global stage
     global star
+    global kbeam
     # global enemys
     stage = Stage()
     player = Kirby()
     star = Star()
+    kbeam = KBeam()
     game_world.add_object(stage, 0)
     game_world.add_object(star, 1)
     game_world.add_object(player, 1)
+    game_world.add_object(kbeam, 1)
 
     # 충돌 대상 정보 등록
     game_world.add_collision_pairs(player, stage.enemys, 'player:enemy')
@@ -61,6 +67,7 @@ def enter():
     game_world.add_collision_pairs(star, stage.enemys, 'star:enemy')
     game_world.add_collision_pairs(star, stage.obstacles, 'star:ob')
     game_world.add_collision_pairs(stage.obstacles, stage.enemys, 'enemy:ob')
+    game_world.add_collision_pairs(kbeam, stage.enemys, 'kbeam:enemy')
 # 종료
 def exit():
     game_world.clear()

@@ -12,11 +12,14 @@ from spark import SUCKED
 from spark import PULL
 from spark import TURN
 import time
+from beam import KBeam
 
 LEFT = 0
 BOTTOM = 1
 RIGHT = 2
 TOP = 3
+
+kbeam = []
 
 class Ability(Enum):
     Defualt = 0,
@@ -376,7 +379,8 @@ class ABILITY:
                 self.set_speed(0.5, 11)
                 self.set_image(64, 74, 258, 0, 0)
             case Ability.Laser:
-                pass
+                self.set_speed(0.35, 10)
+                self.set_image(48, 48, 284, 0, 0)
             case Ability.Fire:
                 pass
 
@@ -384,7 +388,6 @@ class ABILITY:
 
     @staticmethod
     def exit(self, event):
-        self.v = 150
         if PREV == RUN:
             if event == RD:
                 self.dir += 1
@@ -396,16 +399,26 @@ class ABILITY:
                 else:
                     self.dir = -1
             self.cur_state = RUN
-            self.timer = 0
+            self.timer = 0                
         print('EXIT ABILITY')
        
     @staticmethod
     def do(self):
-        self.frame = (self.frame + FRAMES_PER_ACTION *
-                      ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
-        if int(self.frame) == 10:
-            self.frame = 1
-        
+        match(self.ability):
+            case Ability.Spark:
+                self.frame = (self.frame + FRAMES_PER_ACTION *
+                            ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
+            case Ability.Laser:
+                self.frame = (self.frame + FRAMES_PER_ACTION *
+                            ACTION_PER_TIME * game_framework.frame_time)
+                if int(self.frame) == 10:
+                    self.frame = 0
+                    self.fire_laser()
+                    
+
+            case Ability.Fire:
+                pass
+
     @staticmethod
     def draw(self):
         self.composite_draw()
@@ -465,11 +478,16 @@ class Kirby:
         self.star = []
         self.type = 1
         self.bite_enemy_type = None
+        self.kbeams = []
+        self.beam_cnt = 0
 
     def update(self):
         self.gravity()
         self.cur_state.do(self)
         self.invincible_end_time = time.time()
+        if self.y == self.cur_floor and not self.isDrop and not self.isJump:
+            self.v = 150
+
         if self.invincible_end_time - self.invincible_start_time >= 3:
             self.invincible = False
 
@@ -644,12 +662,19 @@ class Kirby:
         play_state.star.velocity = self.face_dir*2
         play_state.star.isFire = True
 
+    def fire_laser(self):
+        play_state.kbeam.x = self.screen_x
+        play_state.kbeam.y = self.y
+        play_state.kbeam.velocity = self.face_dir*2
+
     def fire_breath(self):
         breath = Breath(self.screen_x, self.y, self.face_dir*2, self.face_dir)
         game_world.add_object(breath, 1)
 
+
+
     def get_bb(self):
-        if self.cur_state == ABILITY:
+        if self.cur_state == Ability.Spark:
             return self.screen_x - 60, self.y -60, self.screen_x + 60, self.y + 60
         return self.screen_x - 20, self.y - 20, \
             self.screen_x + 20, self.y + 20
