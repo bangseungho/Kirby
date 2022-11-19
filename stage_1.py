@@ -42,9 +42,9 @@ class STAGE_1:
         self.add_obstacle(1695, 85, 303, 15)
         self.add_obstacle(1605, 165, 30, 65)
         self.add_obstacle(1647.5, 132, 14, 35)
-        self.add_enemy(3, Spark)
+        self.add_enemy(6, Spark)
         self.add_enemy(1, Laser)
-        self.add_enemy(1, Hothead)
+        self.add_enemy(3, Hothead)
         game_world.add_objects(self.enemys, 1)
         print('ENTER STAGE1')
 

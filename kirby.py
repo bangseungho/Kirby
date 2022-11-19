@@ -582,6 +582,9 @@ class Kirby:
             if event.key == SDLK_3:
                 self.ability = Ability.Laser
                 self.image = load_image('resource/Laser_Kirby.png')
+            if event.key == SDLK_4:
+                self.ability = Ability.Fire
+                self.image = load_image('resource/Fire_Kirby.png')
             if event.key == SDLK_SPACE:
                 self.can_jump = True
                 if self.isJump == 0:
