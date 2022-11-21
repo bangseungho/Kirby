@@ -94,10 +94,10 @@ class IDLE:
 
             else:
                 if self.isBite:
-                    if self.frame > 5:
-                        self.frame = 5
+                    if self.frame > 4:
+                        self.frame = 4
                     self.set_speed(0.8, 5)
-                    self.set_image(24, 25, 408, 7, 2)
+                    self.set_image(24, 25, 408, 7, 6)
                 else:
                     if self.v > 0:
                         self.frame = 0
@@ -179,10 +179,10 @@ class RUN:
                 self.set_image(27, 24, 138, 0, 20)  # 바꿈
             else:
                 if self.isBite:
-                    if self.frame > 5:
-                        self.frame = 5
+                    if self.frame > 4:
+                        self.frame = 4
                     self.set_speed(0.8, 5)
-                    self.set_image(24, 25, 408, 7, 2)  # 바꿀거
+                    self.set_image(24, 25, 408, 7, 6) # 바꿀거
                 else:
                     if self.v > 0:
                         self.frame = 0
@@ -503,9 +503,6 @@ class Kirby:
  
     def draw(self):
         self.cur_state.draw(self)
-        debug_print('pppp')
-        debug_print(f'Face Dir: {self.face_dir}, Dir: {self.dir}')
-        # draw_rectangle(*self.get_bb())
 
         self.Life.draw(40, 420, 32, 25)
 

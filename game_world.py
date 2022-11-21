@@ -19,7 +19,6 @@ def remove_object(o):
             remove_collision_object(o)
             del o
             return
-    raise ValueError('Trying destroy non existing object')
 
 def all_objects():
     for layer in objects:
@@ -57,7 +56,7 @@ def clear():
 
 def add_collision_pairs(a, b, group):
     if group not in collision_group:
-        print('add new group')
+        # print('add new group')
         collision_group[group] = [[], []]
 
     if a:
