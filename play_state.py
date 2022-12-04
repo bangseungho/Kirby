@@ -4,13 +4,15 @@ import stage_state
 import logo_state
 import kirby
 import game_world
+
+import server
+
 from kirby import Kirby
 from stage_1 import Stage
 from spark import Spark
-from star import Star
 from hothead import Fire
 from enum import Enum
-from beam import KBeam
+
 
 class Type(Enum):
     Stage = 0
@@ -25,11 +27,7 @@ class Type(Enum):
     KBeam_Laser = 9
 
 
-
-player = None
 stage = None
-star = None
-kbeam = None
 
 def handle_events():
     events = get_events()
@@ -42,32 +40,29 @@ def handle_events():
             else:
                 game_framework.quit()
         else:
-            player.handle_event(event)
-            stage.move_stage(event, player.x, player.y)
+            server.player.handle_event(event)
+            stage.move_stage(event, server.player.x, server.player.y)
 
 # 초기화
 def enter():
-    global player
+    server.player = Kirby()
+    game_world.add_object(server.player, 1)
+
     global stage
-    global star
-    global kbeam
-    # global enemys
     stage = Stage()
-    player = Kirby()
-    star = Star()
-    kbeam = KBeam()
+
     game_world.add_object(stage, 0)
-    game_world.add_object(star, 1)
-    game_world.add_object(player, 1)
-    game_world.add_object(kbeam, 1)
 
     # 충돌 대상 정보 등록
-    game_world.add_collision_pairs(player, stage.enemys, 'player:enemy')
-    game_world.add_collision_pairs(player, stage.obstacles, 'player:ob')
-    game_world.add_collision_pairs(star, stage.enemys, 'star:enemy')
-    game_world.add_collision_pairs(star, stage.obstacles, 'star:ob')
-    game_world.add_collision_pairs(stage.obstacles, stage.enemys, 'enemy:ob')
-    game_world.add_collision_pairs(kbeam, stage.enemys, 'kbeam:enemy')
+    game_world.add_collision_pairs(server.player, server.enemy, 'player:enemy')
+    game_world.add_collision_pairs(server.player, stage.obstacles, 'player:ob')
+    game_world.add_collision_pairs(None, server.player, 'fire:player')
+
+    game_world.add_collision_pairs(None, server.enemy, 'star:enemy')
+    game_world.add_collision_pairs(None, server.enemy, 'kbeam:enemy')
+    game_world.add_collision_pairs(None, stage.obstacles, 'star:ob')
+
+    game_world.add_collision_pairs(stage.obstacles, server.enemy, 'enemy:ob')
 # 종료
 def exit():
     game_world.clear()
@@ -79,8 +74,6 @@ def update():
 
     for a, b, group in game_world.all_collision_pairs():
         if collide(a, b):
-            # if type(a) != Kirby:
-            #     print(group)
             a.handle_collision(b, group)
             b.handle_collision(a, group)
 

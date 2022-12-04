@@ -1,11 +1,11 @@
 from pico2d import *
 import game_world
 import game_framework
-import play_state
 from player_speed import *
 from spark import Spark
 from laser import Laser
 from hothead import Hothead
+import server
 
 NEXT, PREV, UD = range(3)
 
@@ -42,10 +42,10 @@ class STAGE_1:
         self.add_obstacle(1695, 85, 303, 15)
         self.add_obstacle(1605, 165, 30, 65)
         self.add_obstacle(1647.5, 132, 14, 35)
-        self.add_enemy(3, Spark)
+        self.add_enemy(10, Spark)
         self.add_enemy(1, Laser)
         self.add_enemy(3, Hothead)
-        game_world.add_objects(self.enemys, 1)
+        game_world.add_objects(server.enemy, 1)
         print('ENTER STAGE1')
 
     @staticmethod
@@ -54,20 +54,20 @@ class STAGE_1:
 
     @staticmethod
     def do(self):
-        play_state.player.x = clamp(0, play_state.player.x, 2000)
-        play_state.player.screen_x = clamp(20, play_state.player.screen_x, 780)
+        server.player.x = clamp(0, server.player.x, 2000)
+        server.player.screen_x = clamp(20, server.player.screen_x, 780)
 
-        if play_state.player.x >= 400 and play_state.player.x < 1600 and play_state.player.can_move:
-            self.x = 400 - play_state.player.x
+        if server.player.x >= 400 and server.player.x < 1600 and server.player.can_move:
+            self.x = 400 - server.player.x
 
-            if play_state.player.dir != 0 and play_state.player.can_move:
-                if play_state.player.isDash == False:
+            if server.player.dir != 0 and server.player.can_move:
+                if server.player.isDash == False:
                     for ob in self.obstacles:
-                        ob.x -= play_state.player.dir * \
+                        ob.x -= server.player.dir * \
                             RUN_SPEED_PPS * game_framework.frame_time
                 else:
                     for ob in self.obstacles:
-                        ob.x -= play_state.player.dir * 2 * \
+                        ob.x -= server.player.dir * 2 * \
                             RUN_SPEED_PPS * game_framework.frame_time
 
         self.x = clamp(-1600, self.x, 0)
@@ -81,8 +81,8 @@ class STAGE_1:
 class STAGE_2:
     @staticmethod
     def enter(self, event):
-        self.background_image = load_image('resource/stage1_background.png')
-        self.land_image = load_image('resource/stage1_land.png')
+        self.background_image = load_image('resource/stage2_background.png')
+        self.land_image = load_image('resource/stage2_land.png')
         self.next_portal = [600, 90, 650, 140]
         self.prev_portal = [0, 0, 0, 0]
         self.add_obstacle(800, 38, 800, 30)
@@ -104,20 +104,20 @@ class STAGE_2:
 
     @staticmethod
     def do(self):
-        play_state.player.x = clamp(0, play_state.player.x, 2000)
-        play_state.player.screen_x = clamp(20, play_state.player.screen_x, 780)
+        server.player.x = clamp(0, server.player.x, 2000)
+        server.player.screen_x = clamp(20, server.player.screen_x, 780)
 
-        if play_state.player.x >= 400 and play_state.player.x < 1600 and play_state.player.can_move:
-            self.x = 400 - play_state.player.x
+        if server.player.x >= 400 and server.player.x < 1600 and server.player.can_move:
+            self.x = 400 - server.player.x
 
-            if play_state.player.dir != 0 and play_state.player.can_move:
-                if play_state.player.isDash == False:
+            if server.player.dir != 0 and server.player.can_move:
+                if server.player.isDash == False:
                     for ob in self.obstacles:
-                        ob.x -= play_state.player.dir * \
+                        ob.x -= server.player.dir * \
                             RUN_SPEED_PPS * game_framework.frame_time
                 else:
                     for ob in self.obstacles:
-                        ob.x -= play_state.player.dir * 2 * \
+                        ob.x -= server.player.dir * 2 * \
                             RUN_SPEED_PPS * game_framework.frame_time
 
         self.x = clamp(-1600, self.x, 0)
@@ -159,7 +159,6 @@ class Stage:
     def __init__(self):
         self.event_que = []
         self.obstacles = []
-        self.enemys = []
         self.cur_state = STAGE_1
         self.cur_state.enter(self, None)
         self.x, self.y = 0, 0
@@ -173,11 +172,11 @@ class Stage:
         self.cur_state.do(self)
         max = 0
         for ob in self.obstacles:
-            if play_state.player.screen_x > ob.x - ob.w - play_state.player.w + 10 and \
-               play_state.player.screen_x < ob.x + ob.w + play_state.player.w - 10:
+            if server.player.screen_x > ob.x - ob.w - server.player.w + 10 and \
+               server.player.screen_x < ob.x + ob.w + server.player.w - 10:
                 if ob.y + ob.h > max:
-                    max = ob.y + ob.h + play_state.player.h
-                play_state.player.cur_floor = max
+                    max = ob.y + ob.h + server.player.h
+                server.player.cur_floor = max
 
         if self.event_que:
             event = self.event_que.pop()
@@ -199,7 +198,10 @@ class Stage:
 
     def add_enemy(self, num, TYPE):
         for n in range(num):
-            self.enemys.append(TYPE())
+            server.enemy.append(TYPE())
+
+        # for n in range(num):
+        #     self.enemys.append(TYPE())
 
     def add_event(self, event):
         self.event_que.insert(0, event)

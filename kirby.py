@@ -13,6 +13,7 @@ from spark import PULL
 from spark import TURN
 import time
 from beam import KBeam
+import server
 
 LEFT = 0
 BOTTOM = 1
@@ -282,7 +283,7 @@ class SUCK:
                 else:
                     self.dir -= 1
                 self.cur_state = RUN
-            for enemy in play_state.stage.enemys:
+            for enemy in server.enemy:
                 if enemy.cur_state == PULL:
                     enemy.add_event(TURN)
             self.timer = 0
@@ -296,7 +297,7 @@ class SUCK:
             SUCK.range = [self.screen_x - 50 + 50 * self.face_dir, self.y -
                         22, self.screen_x + 50 + 50 * self.face_dir, self.y + 22]
 
-            for enemy in play_state.stage.enemys:
+            for enemy in server.enemy:
                 if SUCK.range[RIGHT] > enemy.x - enemy.w and \
                 SUCK.range[LEFT] < enemy.x + enemy.w and \
                 SUCK.range[TOP] > enemy.y - enemy.h and \
@@ -335,7 +336,6 @@ class TRANSFORM:
     @staticmethod
     def exit(self, event):
         print('EXIT TRANSFORM')
-        print(self.bite_enemy_type)
         match(self.bite_enemy_type):
             case 2:
                 self.ability = Ability.Spark
@@ -656,7 +656,6 @@ class Kirby:
             self.effect_frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, ' ', self.screen_x - self.tw / 2, self.y + self.th + 20, (self.w + self.tw) * 1.5, (self.h + self.th) * 1.5)
 
     def damaged(self, damage):
-
         if not self.invincible:
             self.invincible_start_time = time.time()
             self.invincible = True
@@ -666,15 +665,16 @@ class Kirby:
                 self.hps = 6
 
     def fire_star(self):
-        play_state.star.x = self.screen_x
-        play_state.star.y = self.y
-        play_state.star.velocity = self.face_dir*2
-        play_state.star.isFire = True
+        star = Star(self.screen_x, self.y, self.face_dir*2)
+        star.isFire = True
+        game_world.add_object(star, 1)
+        game_world.add_collision_pairs(star, None, 'star:enemy')
+        game_world.add_collision_pairs(star, None, 'star:ob')
 
     def fire_laser(self):
-        play_state.kbeam.x = self.screen_x
-        play_state.kbeam.y = self.y
-        play_state.kbeam.velocity = self.face_dir*2
+        kbeam = KBeam(self.screen_x, self.y, self.face_dir*2)
+        game_world.add_object(kbeam, 1)
+        game_world.add_collision_pairs(kbeam, None, 'kbeam:enemy')
 
     def fire_breath(self):
         breath = Breath(self.screen_x, self.y, self.face_dir*2, self.face_dir)
@@ -707,4 +707,6 @@ class Kirby:
                             self.damaged(3)
                     else:
                         self.damaged(1)
+        if group == 'fire:player':
+            self.damaged(3)
             

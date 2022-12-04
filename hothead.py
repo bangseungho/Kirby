@@ -152,7 +152,7 @@ class Hothead(Enemy):
     def fire_hotfire(self):
         fires = Fire(self.x, self.y, self.face_dir)
         game_world.add_object(fires, 0)
-        game_world.add_collision_pairs(fires, play_state.player, 'player:fire')
+        game_world.add_collision_pairs(fires, None, 'fire:player')
 
     def handle_collision(self, other, group):
         if group == 'star:enemy':

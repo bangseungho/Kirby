@@ -3,7 +3,7 @@ from enemy import Enemy
 import game_world
 import game_framework
 import kirby
-import play_state
+import server
 import player_speed
 
 
@@ -55,13 +55,13 @@ class Star:
 
         Enemy.with_player(self)
 
-        if play_state.player.dir != 0 and \
-           play_state.player.x > 400 and play_state.player.x < 1600:
-            if play_state.player.isDash == False:
-                self.cx -= play_state.player.dir * \
+        if server.player.dir != 0 and \
+           server.player.x > 400 and server.player.x < 1600:
+            if server.player.isDash == False:
+                self.cx -= server.player.dir * \
                                 player_speed.RUN_SPEED_PPS * game_framework.frame_time
             else:
-                self.cx -= play_state.player.dir * 2 *\
+                self.cx -= server.player.dir * 2 *\
                                 player_speed.RUN_SPEED_PPS * game_framework.frame_time
 
         if self.x < 400:

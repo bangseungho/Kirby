@@ -1,11 +1,12 @@
 from pico2d import *
 from enum import Enum
-import play_state
 import game_framework
 import player_speed
 import random
 import math
 import game_world
+
+import server
 
 TIMER, TURN, PATROL, DAMAGED, SUCKED = range(5)
 event_name = ['TIMER', 'TURN', 'PATROL', 'DAMAGED', 'SUCKED']
@@ -44,7 +45,6 @@ class DEATH:
             game_world.remove_object(self)
 
     def draw(self):
-        print(self.death_timer)
         if self.death_timer > 500:
             self.scomposite_draw()
         elif self.death_timer % 2 == 0:
@@ -71,13 +71,13 @@ class PULL:
 
     @staticmethod
     def do(self):
-        self.face_dir = -play_state.player.face_dir
+        self.face_dir = -server.player.face_dir
 
-        if self.x < play_state.player.screen_x:
+        if self.x < server.player.screen_x:
             self.x += self.RUN_SPEED_PPS * game_framework.frame_time * 1.3
         else:
             self.x -= self.RUN_SPEED_PPS * game_framework.frame_time * 1.3
-        if self.y < play_state.player.y:
+        if self.y < server.player.y:
             self.y += self.RUN_SPEED_PPS * game_framework.frame_time * 1.3
         else:
             self.y -= self.RUN_SPEED_PPS * game_framework.frame_time * 1.3
@@ -117,20 +117,20 @@ class Enemy:
         self.death_cnt = 0
 
     def with_player(self):
-       if play_state.player.dir != 0 and \
-           play_state.player.x > 400 and play_state.player.x < 1600:
-            if play_state.player.isDash == False:
-                self.x -= play_state.player.dir * \
+       if server.player.dir != 0 and \
+           server.player.x > 400 and server.player.x < 1600:
+            if server.player.isDash == False:
+                self.x -= server.player.dir * \
                     player_speed.RUN_SPEED_PPS * game_framework.frame_time
             else:
-                self.x -= play_state.player.dir * 2 * \
+                self.x -= server.player.dir * 2 * \
                     player_speed.RUN_SPEED_PPS * game_framework.frame_time
 
     def update(self):
         self.cur_state.do(self)
 
-        self.dis_to_player = abs(self.x - play_state.player.screen_x)
-        self.height_to_player = abs(self.y - play_state.player.y)
+        self.dis_to_player = abs(self.x - server.player.screen_x)
+        self.height_to_player = abs(self.y - server.player.y)
 
         self.with_player()
 
@@ -147,9 +147,7 @@ class Enemy:
 
     def draw(self):
         self.cur_state.draw(self)
-        debug_print('pppp')
-        debug_print(f'Face Dir: {self.face_dir}, Dir: {self.dir}')
-        # draw_rectangle(*self.get_bb())
+        draw_rectangle(*self.get_bb())
     
     def scomposite_draw(self):
         if self.face_dir == 1:

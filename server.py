@@ -1,0 +1,2 @@
+player = None
+enemy = []
