@@ -1,3 +1,3 @@
 player = None
 stage = None
-enemy = []
+enemy = [] 

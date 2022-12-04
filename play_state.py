@@ -1,16 +1,11 @@
 from pico2d import *
 import game_framework
-import stage_state
-import logo_state
-import kirby
 import game_world
 
 import server
 
 from kirby import Kirby
 from stage_1 import Stage
-from spark import Spark
-from hothead import Fire
 from enum import Enum
 
 
@@ -25,9 +20,7 @@ class Type(Enum):
     Fire = 7
     Beam_Laser = 8
     KBeam_Laser = 9
-
-
-stage = None
+    Dedede = 10
 
 def handle_events():
     events = get_events()
@@ -40,7 +33,9 @@ def handle_events():
             else:
                 game_framework.quit()
         else:
+            pass
             server.player.handle_event(event)
+            server.stage.handle_event(event)
 
 # 초기화
 def enter():
@@ -53,13 +48,15 @@ def enter():
     # 충돌 대상 정보 등록
     game_world.add_collision_pairs(server.player, server.enemy, 'player:enemy')
     game_world.add_collision_pairs(server.player, server.stage.obstacles, 'player:ob')
+    game_world.add_collision_pairs(None, server.player, 'beams:player')
     game_world.add_collision_pairs(None, server.player, 'fire:player')
 
     game_world.add_collision_pairs(None, server.enemy, 'star:enemy')
     game_world.add_collision_pairs(None, server.enemy, 'kbeam:enemy')
     game_world.add_collision_pairs(None, server.stage.obstacles, 'star:ob')
-
     game_world.add_collision_pairs(server.stage.obstacles, server.enemy, 'enemy:ob')
+    pass
+
 # 종료
 def exit():
     game_world.clear()

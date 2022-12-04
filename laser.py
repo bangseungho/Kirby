@@ -91,7 +91,7 @@ class Laser(Enemy):
     def fire_beam_laser(self):
         self.beams.append(beam_laser(self.x, self.y))
         game_world.add_objects(self.beams, 1)
-        game_world.add_collision_pairs(self.beams, server.player, 'beams:player')
+        game_world.add_collision_pairs(self.beams, None, 'beams:player')
 
     def handle_collision(self, other, group):
         if group == 'star:enemy':

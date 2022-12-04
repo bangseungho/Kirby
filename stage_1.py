@@ -5,6 +5,8 @@ from player_speed import *
 from spark import Spark
 from laser import Laser
 from hothead import Hothead
+from dedede import Dedede
+from enemy import Enemy
 import server
 
 NEXT, PREV, UD = range(3)
@@ -12,6 +14,7 @@ NEXT, PREV, UD = range(3)
 event_name = ['NEXT', 'PREV', 'UD']
 
 cnt = 0
+
 
 class Obstacle:
     def __init__(self, x, y, w, h):
@@ -22,7 +25,7 @@ class Obstacle:
 
     def get_bb(self):
         return self.x - self.w, self.y - self.h, self.x + self.w, self.y + self.h
-    
+
     def handle_collision(self, other, group):
         if group == 'star:ob':
             pass
@@ -32,6 +35,7 @@ class Obstacle:
 class STAGE_1:
     @staticmethod
     def enter(self, event):
+        self.stype = 1
         self.background_image = load_image('resource/stage1_background.png')
         self.land_image = load_image('resource/stage1_land.png')
 
@@ -51,10 +55,22 @@ class STAGE_1:
         self.add_enemy(1, Laser)
         self.add_enemy(1, Hothead)
         game_world.add_objects(server.enemy, 1)
+
         print('ENTER STAGE1')
 
     @staticmethod
     def exit(self, event):
+        for a in server.enemy:
+            a.x = -999999
+            a.y = -999999
+        for a in server.stage.obstacles:
+            a.x = -999999
+            a.y = -999999
+
+        game_world.clear()
+        server.enemy.clear()
+        self.obstacles.clear()
+
         print('EXIT STAGE1')
 
     @staticmethod
@@ -70,7 +86,8 @@ class STAGE_1:
             ob.x = ob.sx - self.window_left
             ob.y = ob.sy - self.window_bottom
 
-        self.sx, self.sy = self.canvas_width//2 - self.window_left / 10, self.canvas_height//2 - self.window_bottom
+        self.sx, self.sy = self.canvas_width//2 - self.window_left / \
+            10, self.canvas_height//2 - self.window_bottom
 
         self.background_image.draw(self.sx, self.sy, 1125, 500)
 
@@ -80,80 +97,59 @@ class STAGE_1:
         )
 
 
-# class STAGE_2:
-#     @staticmethod
-#     def enter(self, event):
-#         self.background_image = load_image('resource/stage2_background.png')
-#         self.land_image = load_image('resource/stage2_land.png')
-#         self.next_portal = [600, 90, 650, 140]
-#         self.prev_portal = [0, 0, 0, 0]
-#         self.add_obstacle(800, 38, 800, 30)
-#         self.add_obstacle(2010, 200, 10, 100)
-#         self.add_obstacle(582.5, 85, 24, 15)
-#         self.add_obstacle(1157.5, 85, 89, 15)
-#         self.add_obstacle(1695, 85, 303, 15)
-#         self.add_obstacle(1605, 165, 30, 65)
-#         self.add_obstacle(1647.5, 132, 14, 35)
-#         self.add_enemy(3, Spark)
-#         self.add_enemy(1, Laser)
-#         self.add_enemy(1, Hothead)
-#         game_world.add_objects(self.enemys, 1)
-#         print('ENTER STAGE2')
+class STAGE_2:
+    @staticmethod
+    def enter(self, event):
+        self.stype = 2
+        self.frame = 0
+        game_world.add_object(server.stage, 0)
+        game_world.add_object(server.player, 1)
 
-#     @staticmethod
-#     def exit(self, event):
-#         print('EXIT STAGE2')
+        server.stage.window_left = 0
+        server.player.y = 400
+        server.player.x = 400
+        server.player.screen_x = 400
+        server.player.sx = 400
 
-#     @staticmethod
-#     def do(self):
-#         server.player.x = clamp(0, server.player.x, 2000)
-#         server.player.screen_x = clamp(20, server.player.screen_x, 780)
+        self.background_image = load_image('resource/stage1_background.png')
+        self.land_image = load_image('resource/stage2_land.png')
+        self.add_obstacle(400, 60, 400, 40)
 
-#         if server.player.x >= 400 and server.player.x < 1600 and server.player.can_move:
-#             self.x = 400 - server.player.x
+        self.add_enemy(1, Dedede)
+        game_world.add_objects(server.enemy, 1)
 
-#             if server.player.dir != 0 and server.player.can_move:
-#                 if server.player.isDash == False:
-#                     for ob in self.obstacles:
-#                         ob.x -= server.player.dir * \
-#                             RUN_SPEED_PPS * game_framework.frame_time
-#                 else:
-#                     for ob in self.obstacles:
-#                         ob.x -= server.player.dir * 2 * \
-#                             RUN_SPEED_PPS * game_framework.frame_time
+        self.canvas_width = get_canvas_width()
+        self.canvas_height = get_canvas_height()
+        self.w = 800
+        self.h = self.land_image.h
+        self.y = self.canvas_height // 2
 
-#         self.x = clamp(-1600, self.x, 0)
+        
 
-#     @staticmethod
-#     def draw(self):
-#         self.background_image.clip_draw_to_origin(
-#             0, 0, 1100, 450, self.x / 5, 0)
-#         self.land_image.clip_draw_to_origin(0, 0, 2000, 300, self.x, -2)
+        game_world.add_collision_pairs(
+            server.player, self.obstacles, 'player:ob')
+        # self.add_enemy(1, Spark)
 
-# class STAGE_3:
-#     @staticmethod
-#     def enter(self, event):
-#         self.prev_portal = [600, 90, 650, 140]
-#         self.next_portal = [0, 0, 0, 0]
-#         print('ENTER STAGE3')
+        print('ENTER STAGE1')
 
-#     @staticmethod
-#     def exit(self, event):
-#         print('EXIT STAGE3')
+    @staticmethod
+    def exit(self, event):
+        print('EXIT STAGE1')
 
-#     @staticmethod
-#     def do(self):
-#         pass
+    @staticmethod
+    def do(self):
+        self.frame = (self.frame + FRAMES_PER_ACTION * 2.5 *
+                ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
 
-#     @staticmethod
-#     def draw(self):
-#         pass
+    @staticmethod
+    def draw(self):
+        self.land_image.clip_composite_draw(int(
+            self.frame) * 255, 0, 255, 190, 0, ' ', 400, self.y, 810, 455)
 
 
 next_state = {
-    # STAGE_1:   {NEXT: STAGE_2},
-    # STAGE_2:   {PREV: STAGE_1, NEXT: STAGE_3},
-    # STAGE_3:   {PREV: STAGE_2},
+    STAGE_1:   {NEXT: STAGE_2},
+    STAGE_2:   {PREV: STAGE_1},
 }
 
 
@@ -165,8 +161,8 @@ class Stage:
         self.cur_state.enter(self, None)
         self.x, self.y = 0, 0
         self.type = 0
+        self.stype = 1
 
-        
     def update(self):
         self.cur_state.do(self)
         max = 0
@@ -191,7 +187,7 @@ class Stage:
         self.cur_state.draw(self)
         for ob in self.obstacles:
             draw_rectangle(*ob.get_bb())
-    
+
     def add_obstacle(self, x, y, w, h):
         self.obstacles.append(Obstacle(x, y, w, h))
 
@@ -201,3 +197,10 @@ class Stage:
 
     def add_event(self, event):
         self.event_que.insert(0, event)
+
+    def handle_event(self, event):
+        if event.type == SDL_KEYDOWN:
+            if event.key == SDLK_RIGHTBRACKET:
+                self.add_event(NEXT)
+            if event.key == SDLK_LEFTBRACKET:
+                self.add_event(PREV)

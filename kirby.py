@@ -14,6 +14,8 @@ from spark import TURN
 import time
 from beam import KBeam
 import server
+from stage_1 import STAGE_1
+from stage_1 import STAGE_2
 
 LEFT = 0
 BOTTOM = 1
@@ -148,8 +150,7 @@ class RUN:
         self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
         self.x = clamp(20, self.x, server.stage.w - 1 - 20) 
 
-        if self.x < 400 or self.x >= 1600:
-            self.screen_x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
+        self.screen_x =  self.x - server.stage.window_left
         self.screen_x = clamp(20, self.screen_x, server.stage.w - 1 - 20) 
 
         if not self.isCollide:
@@ -577,6 +578,9 @@ class Kirby:
             if event.key == SDLK_1:
                 self.ability = Ability.Defualt
                 self.image = load_image('resource/Default_Kirby.png')
+            if event.key == SDLK_a:
+                for a in game_world.all_objects():
+                    print(a)
             if event.key == SDLK_2:
                 self.ability = Ability.Spark
                 self.image = load_image('resource/Spark_Kirby.png')

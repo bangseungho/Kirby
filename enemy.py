@@ -8,8 +8,8 @@ import game_world
 
 import server
 
-TIMER, TURN, PATROL, DAMAGED, SUCKED = range(5)
-event_name = ['TIMER', 'TURN', 'PATROL', 'DAMAGED', 'SUCKED']
+TIMER, TURN, PATROL, DAMAGED, SUCKED, CATTACK = range(6)
+event_name = ['TIMER', 'TURN', 'PATROL', 'DAMAGED', 'SUCKED', 'CATTACK']
 
 class DEATH:
     @staticmethod
@@ -132,7 +132,8 @@ class Enemy:
         self.dis_to_player = abs(self.x - server.player.screen_x)
         self.height_to_player = abs(self.y - server.player.y)
 
-        self.with_player()
+        if self.type != 10:
+            self.with_player()
 
         if self.event_que:
             event = self.event_que.pop()
@@ -147,7 +148,9 @@ class Enemy:
 
     def draw(self):
         self.cur_state.draw(self)
-        draw_rectangle(*self.get_bb())
+        debug_print('pppp')
+        debug_print(f'Face Dir: {self.face_dir}, Dir: {self.dir}')
+        # draw_rectangle(*self.get_bb())
     
     def scomposite_draw(self):
         if self.face_dir == 1:

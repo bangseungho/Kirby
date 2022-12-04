@@ -24,7 +24,18 @@ def all_objects():
     for layer in objects:
         for o in layer:
             yield o  # 제네레이터, 모든 객체들을 하나씩 넘겨준다.
-            
+
+def enemy_clear():
+    while True:
+        flag = False
+        for o in all_objects():
+            if o.type == 2 or o.type == 3 or o.type == 4 or o.type == 6:
+                remove_object(o)
+                flag = True
+                break
+        if flag == False:
+            break
+
 def clear():
     for o in all_objects():
         del o
