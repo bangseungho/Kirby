@@ -42,6 +42,7 @@ key_event_table = {
     (SDL_KEYUP, SDLK_LCTRL): CU,
 }
 
+
 # 2 : 상태의 정의
 
 
@@ -145,9 +146,7 @@ class RUN:
                       ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
 
         self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
-
-        if self.x < 400 or self.x >= 1600:
-            self.screen_x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
+        self.x = clamp(20, self.x, server.stage.w - 1 - 20) 
 
         if not self.isCollide:
             self.dir = self.face_dir
@@ -229,8 +228,7 @@ class DASH:
             self.isDash = True
             self.x += self.dir * RUN_SPEED_PPS * 2 * game_framework.frame_time
 
-        if self.x < 400 or self.x >= 1600:
-            self.screen_x += self.dir * RUN_SPEED_PPS * 2 * game_framework.frame_time
+        self.x = clamp(20, self.x, server.stage.w - 1 - 20)
 
         if not self.isCollide:
             self.dir = self.face_dir
@@ -439,7 +437,7 @@ next_state = {
 
 class Kirby:
     def __init__(self):
-        self.x, self.y = 800 // 2, 90
+        self.x, self.y = 400, 90
         self.screen_x, self.screen_y = 800 // 2, 90
         self.v, self.m = VELOCITY, MASS
         self.w, self.h, self.tw, self.th = 22, 20, 0, 0
@@ -480,6 +478,7 @@ class Kirby:
         self.bite_enemy_type = None
         self.kbeams = []
         self.beam_cnt = 0
+        self.font = load_font('ENCR10B.TTF', 16)
 
     def update(self):
         self.gravity()
@@ -634,26 +633,31 @@ class Kirby:
         self.image_posY = image_posY
 
     def composite_draw(self):
+        sx, sy = self.x - server.stage.window_left, self.y - server.stage.window_bottom
+
+        server.player.font.draw(sx - 60, sy + 50, 'player_x : %d' % (self.x), (255, 255, 0))
+
         self.cnt += 1
         if self.invincible:
             if self.cnt % 2 == 0:
                 if self.face_dir == 1:
                     self.image.clip_composite_draw(int(
-                        self.frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, ' ', self.screen_x - self.tw / 2, self.y + self.th + 5, (self.w + self.tw) * 2, (self.h + self.th) * 2)
+                        self.frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, ' ', sx - self.tw / 2, sy + self.th + 5, (self.w + self.tw) * 2, (self.h + self.th) * 2)
                 else:
                     self.image.clip_composite_draw(int(
-                        self.frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, 'h', self.screen_x + self.tw / 2, self.y + self.th + 5, (self.w + self.tw) * 2, (self.h + self.th) * 2)
+                        self.frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, 'h', sx + self.tw / 2, sy + self.th + 5, (self.w + self.tw) * 2, (self.h + self.th) * 2)
         elif not self.invincible:
             if self.face_dir == 1:
                 self.image.clip_composite_draw(int(
-                    self.frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, ' ', self.screen_x - self.tw / 2, self.y + self.th + 5, (self.w + self.tw) * 2, (self.h + self.th) * 2)
+                    self.frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, ' ', sx - self.tw / 2, sy + self.th + 5, (self.w + self.tw) * 2, (self.h + self.th) * 2)
             else:
                 self.image.clip_composite_draw(int(
-                    self.frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, 'h', self.screen_x + self.tw / 2, self.y + self.th + 5, (self.w + self.tw) * 2, (self.h + self.th) * 2)
+                    self.frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, 'h', sx + self.tw / 2, sy + self.th + 5, (self.w + self.tw) * 2, (self.h + self.th) * 2)
 
     def ecomposite_draw(self, who):
+        sx, sy = self.x - server.stage.window_left, self.y - server.stage.window_bottom
         who.clip_composite_draw(int(
-            self.effect_frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, ' ', self.screen_x - self.tw / 2, self.y + self.th + 20, (self.w + self.tw) * 1.5, (self.h + self.th) * 1.5)
+            self.effect_frame) * (self.w + self.tw), self.image_posY, self.w + self.tw, self.h + self.th, 0, ' ', sx - self.tw / 2, sy + self.th + 20, (self.w + self.tw) * 1.5, (self.h + self.th) * 1.5)
 
     def damaged(self, damage):
         if not self.invincible:

@@ -41,28 +41,26 @@ def handle_events():
                 game_framework.quit()
         else:
             server.player.handle_event(event)
-            stage.move_stage(event, server.player.x, server.player.y)
 
 # 초기화
 def enter():
+    server.stage = Stage()
+    game_world.add_object(server.stage, 0)
+
     server.player = Kirby()
     game_world.add_object(server.player, 1)
 
-    global stage
-    stage = Stage()
-
-    game_world.add_object(stage, 0)
 
     # 충돌 대상 정보 등록
     game_world.add_collision_pairs(server.player, server.enemy, 'player:enemy')
-    game_world.add_collision_pairs(server.player, stage.obstacles, 'player:ob')
+    game_world.add_collision_pairs(server.player, server.stage.obstacles, 'player:ob')
     game_world.add_collision_pairs(None, server.player, 'fire:player')
 
     game_world.add_collision_pairs(None, server.enemy, 'star:enemy')
     game_world.add_collision_pairs(None, server.enemy, 'kbeam:enemy')
-    game_world.add_collision_pairs(None, stage.obstacles, 'star:ob')
+    game_world.add_collision_pairs(None, server.stage.obstacles, 'star:ob')
 
-    game_world.add_collision_pairs(stage.obstacles, server.enemy, 'enemy:ob')
+    game_world.add_collision_pairs(server.stage.obstacles, server.enemy, 'enemy:ob')
 # 종료
 def exit():
     game_world.clear()
