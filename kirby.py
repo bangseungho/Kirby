@@ -148,6 +148,10 @@ class RUN:
         self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
         self.x = clamp(20, self.x, server.stage.w - 1 - 20) 
 
+        if self.x < 400 or self.x >= 1600:
+            self.screen_x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
+        self.screen_x = clamp(20, self.screen_x, server.stage.w - 1 - 20) 
+
         if not self.isCollide:
             self.dir = self.face_dir
 
@@ -229,6 +233,7 @@ class DASH:
             self.x += self.dir * RUN_SPEED_PPS * 2 * game_framework.frame_time
 
         self.x = clamp(20, self.x, server.stage.w - 1 - 20)
+        self.screen_x =  self.x - server.stage.window_left
 
         if not self.isCollide:
             self.dir = self.face_dir
@@ -635,7 +640,7 @@ class Kirby:
     def composite_draw(self):
         sx, sy = self.x - server.stage.window_left, self.y - server.stage.window_bottom
 
-        server.player.font.draw(sx - 60, sy + 50, 'player_x : %d' % (self.x), (255, 255, 0))
+        server.player.font.draw(sx - 60, sy + 50, 'player_x : %d' % (self.screen_x), (255, 255, 0))
 
         self.cnt += 1
         if self.invincible:

@@ -50,7 +50,6 @@ def enter():
     server.player = Kirby()
     game_world.add_object(server.player, 1)
 
-
     # 충돌 대상 정보 등록
     game_world.add_collision_pairs(server.player, server.enemy, 'player:enemy')
     game_world.add_collision_pairs(server.player, server.stage.obstacles, 'player:ob')
