@@ -5,6 +5,7 @@ import kirby
 import random
 import game_framework
 import game_world
+import stage_1
 
 VELOCITY = 5
 MASS = 10
@@ -69,6 +70,10 @@ class HURT:
             self.death_timer -= 1
 
             if self.death_timer == 0:
+                Dedede.death_sound.play()
+                stage_1.Stage.bgm = load_music('sound/Clear.mp3')
+                stage_1.Stage.bgm.set_volume(32)
+                stage_1.Stage.bgm.play()
                 game_world.remove_object(self)
         elif self.timer <= 0:
             self.add_event(TURN)
@@ -198,6 +203,7 @@ class JUMPATTACK:
 
         if self.timer == 300:
             self.make_star()
+            Dedede.jump_attack_sound.play()
             if server.player.y < 150:
                 server.player.damaged(5)
             server.stage.y += 5
@@ -223,6 +229,8 @@ class JUMPATTACK:
 
 class Dedede(Enemy):
     image = None
+    death_sound = None
+    jump_attack_sound = None
 
     def __init__(self):
         super(Dedede, self).__init__(600, 155, 70, 70, 0, RUN, 10)
@@ -242,6 +250,10 @@ class Dedede(Enemy):
             PULL : { TURN: RUN, PATROL: RUN, DAMAGED: DEATH,  },
             HURT : { TURN: RUN, PATROL: RUN, DAMAGED: HURT, JATTACK: JUMPATTACK, SATTACK: STRONGATTACK}
         }
+        Dedede.death_sound = load_wav('sound/Dedede_death.wav')
+        Dedede.death_sound.set_volume(32)        
+        Dedede.jump_attack_sound = load_wav('sound/Dedede_jumpattack.wav')
+        Dedede.jump_attack_sound.set_volume(32)
 
     def handle_collision(self, other, group):
         if group == 'star:enemy':

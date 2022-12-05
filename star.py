@@ -41,7 +41,7 @@ class Star:
                                         42, 42, 0, ' ', self.cx, self.cy, 50, 50)
         
     def update(self):
-        self.x += self.velocity / 1.5
+        self.x += self.velocity
         self.ex, self.ey = self.x + 15 * -1 * self.velocity, self.y
         self.frame = (self.frame + 5 * game_framework.frame_time) % 3
 
@@ -52,17 +52,6 @@ class Star:
             self.face_dir = 1
         elif self.velocity < 0:
             self.face_dir = -1
-
-        Enemy.with_player(self)
-
-        if server.player.dir != 0 and \
-           server.player.x > 400 and server.player.x < 1600:
-            if server.player.isDash == False:
-                self.cx -= server.player.dir * \
-                                player_speed.RUN_SPEED_PPS * game_framework.frame_time
-            else:
-                self.cx -= server.player.dir * 2 *\
-                                player_speed.RUN_SPEED_PPS * game_framework.frame_time
 
         if self.x < 400:
             self.rotate += 0.02

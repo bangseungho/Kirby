@@ -4,11 +4,15 @@ import play_state
 import logo_state
 
 image = None
-
+bgm = None
 
 def enter():
     global image
+    global bgm
     image = load_image('resource/stage.png')
+    bgm = load_music('sound/Stage.mp3')
+    bgm.set_volume(32)
+    bgm.repeat_play()
     pass
 
 
@@ -31,7 +35,7 @@ def handle_events():
 
 def draw():
     clear_canvas()
-    image.draw(800//2, 450//2)
+    image.draw(800//2, 450//2, 800, 450)
     update_canvas()
 
 

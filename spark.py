@@ -54,6 +54,7 @@ class RUN:
         self.scomposite_draw()
 
 class JUMP:
+
     @staticmethod
     def enter(self, event):
         self.set_speed(1.5, 2)
@@ -89,6 +90,7 @@ class JUMP:
 class ATTACK:
     @staticmethod
     def enter(self, event):
+        Spark.spark_sound.play()
         self.frame = 0
         self.set_speed(1.3, 15)
         self.set_image(64, 64, 38)
@@ -114,6 +116,7 @@ class ATTACK:
 
 class Spark(Enemy):
     image = None
+    spark_sound = None
 
     def __init__(self):
         super(Spark, self).__init__(random.randint(800, 1000), 90, 24, 19, 0, RUN, 2)
@@ -128,6 +131,8 @@ class Spark(Enemy):
             DEATH : { TURN: DEATH, PATROL: DEATH, DAMAGED: DEATH, SUCKED: DEATH },
             PULL : { TURN: RUN, PATROL: RUN, DAMAGED: DEATH, SUCKED: PULL }
         }
+        Spark.spark_sound = load_wav('sound/Spark.wav')
+        Spark.spark_sound.set_volume(32)
 
     def handle_collision(self, other, group):
         if group == 'enemy:ob':

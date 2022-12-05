@@ -38,6 +38,9 @@ class STAGE_1:
         self.stype = 1
         self.background_image = load_image('resource/stage1_background.png')
         self.land_image = load_image('resource/stage1_land.png')
+        Stage.bgm = load_music('sound/Stage1.mp3')
+        Stage.bgm.set_volume(32)
+        Stage.bgm.repeat_play()
 
         self.canvas_width = get_canvas_width()
         self.canvas_height = get_canvas_height()
@@ -54,6 +57,9 @@ class STAGE_1:
         self.add_enemy(1, Spark)
         self.add_enemy(1, Laser)
         self.add_enemy(1, Hothead)
+
+        
+
         game_world.add_objects(server.enemy, 1)
 
         print('ENTER STAGE1')
@@ -66,7 +72,6 @@ class STAGE_1:
         for a in server.stage.obstacles:
             a.x = -999999
             a.y = -999999
-
         game_world.clear()
         server.enemy.clear()
         self.obstacles.clear()
@@ -114,6 +119,9 @@ class STAGE_2:
         self.background_image = load_image('resource/stage1_background.png')
         self.land_image = load_image('resource/stage2_land.png')
         self.add_obstacle(400, 60, 400, 40)
+        Stage.bgm = load_music('sound/Stage2.mp3')
+        Stage.bgm.set_volume(32)
+        Stage.bgm.repeat_play()
 
         self.add_enemy(1, Dedede)
         game_world.add_objects(server.enemy, 1)
@@ -155,6 +163,8 @@ next_state = {
 
 
 class Stage:
+    bgm = None
+    next_state_sound = None
     def __init__(self):
         self.event_que = []
         self.obstacles = []
@@ -163,6 +173,8 @@ class Stage:
         self.x, self.y = 0, 0
         self.type = 0
         self.stype = 1
+        Stage.next_state_sound = load_wav('sound/Next.wav')
+        Stage.next_state_sound.set_volume(32)
 
     def update(self):
         self.cur_state.do(self)
@@ -202,6 +214,7 @@ class Stage:
     def handle_event(self, event):
         if event.type == SDL_KEYDOWN:
             if event.key == SDLK_RIGHTBRACKET:
+                Stage.next_state_sound.play()
                 self.add_event(NEXT)
             if event.key == SDLK_LEFTBRACKET:
                 self.add_event(PREV)

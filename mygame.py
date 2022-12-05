@@ -11,5 +11,5 @@ WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 450
 
 pico2d.open_canvas(WINDOW_WIDTH, WINDOW_HEIGHT)  
-game_framework.run(logo_state)
+game_framework.run(play_state)
 pico2d.close_canvas()  

@@ -13,15 +13,19 @@ back_ground_y = 450//2
 posX, posY = 800//2, 550//2
 dir = 1
 pdir = 1
-
+bgm = None
 
 def enter():
     global back_ground_image
     global logo_image
     global press_start
+    global bgm
     back_ground_image = load_image('resource/logo_background.png')
     logo_image = load_image('resource/logo.png')
     press_start = load_image('resource/press_start.png')
+    bgm = load_music('sound/Title.mp3')
+    bgm.set_volume(32)
+    bgm.repeat_play()
 
 
 def exit():
