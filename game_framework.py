@@ -60,8 +60,8 @@ def change_state(state):
 
 def push_state(state):
     global stack
-    if (len(stack) > 0):
-        stack[-1].pause()
+    # if (len(stack) > 0):
+    #     stack[-1].pause()
     stack.append(state)
     state.enter()
 
