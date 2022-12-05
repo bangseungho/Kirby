@@ -107,9 +107,9 @@ class STAGE_2:
 
         server.stage.window_left = 0
         server.player.y = 400
-        server.player.x = 400
-        server.player.screen_x = 400
-        server.player.sx = 400
+        server.player.x = 200
+        server.player.screen_x = 200
+        server.player.sx = 200
 
         self.background_image = load_image('resource/stage1_background.png')
         self.land_image = load_image('resource/stage2_land.png')

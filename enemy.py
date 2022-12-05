@@ -8,8 +8,8 @@ import game_world
 
 import server
 
-TIMER, TURN, PATROL, DAMAGED, SUCKED, CATTACK = range(6)
-event_name = ['TIMER', 'TURN', 'PATROL', 'DAMAGED', 'SUCKED', 'CATTACK']
+TIMER, TURN, PATROL, DAMAGED, SUCKED, JATTACK = range(6)
+event_name = ['TIMER', 'TURN', 'PATROL', 'DAMAGED', 'SUCKED', 'JATTACK']
 
 class DEATH:
     @staticmethod
