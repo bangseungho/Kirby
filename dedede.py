@@ -56,7 +56,6 @@ class HURT:
     def enter(self, event):
         self.set_speed(1.3, 1)
         self.set_image(62, 62, 180)
-        print(self.life)
         self.frame = 0
         self.timer = 200
     @staticmethod
@@ -82,8 +81,6 @@ class HURT:
                 game_world.remove_object(self)
 
             self.end = time.time()
-            print(self.end - self.start)
-            
             if self.end - self.start > 3:
                  game_framework.push_state(final_state)
 

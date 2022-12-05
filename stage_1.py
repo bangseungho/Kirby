@@ -55,7 +55,7 @@ class STAGE_1:
         self.add_obstacle(1695, 85, 303, 15)
         self.add_obstacle(1605, 165, 30, 65)
         self.add_obstacle(1647.5, 132, 14, 35)
-        self.add_enemy(1, Spark)
+        self.add_enemy(3, Spark)
         self.add_enemy(1, Laser)
         self.add_enemy(1, Hothead)
 
@@ -117,7 +117,6 @@ class STAGE_2:
         server.player.screen_x = 200
         server.player.sx = 200
         server.player.default_kirby()
-        print(server.player.ability)
 
         self.background_image = load_image('resource/stage1_background.png')
         self.land_image = load_image('resource/stage2_land.png')

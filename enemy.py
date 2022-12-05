@@ -148,9 +148,6 @@ class Enemy:
 
     def draw(self):
         self.cur_state.draw(self)
-        debug_print('pppp')
-        debug_print(f'Face Dir: {self.face_dir}, Dir: {self.dir}')
-        # draw_rectangle(*self.get_bb())
     
     def scomposite_draw(self):
         if self.face_dir == 1:
