@@ -3,6 +3,7 @@ import game_framework
 import play_state
 import stage_state
 import server
+import kirby
 import datetime
 
 back_ground_image = None
@@ -23,6 +24,7 @@ def enter():
     back_ground_die_image = load_image('resource/black_die.png')
     server.clear_time = datetime.datetime.now()
     server.elapsed = server.clear_time - server.start_time
+    server.player.cur_state = kirby.IDLE
 
 def exit():
     pass

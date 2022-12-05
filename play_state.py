@@ -28,10 +28,11 @@ def handle_events():
         if event.type == SDL_QUIT:
             game_framework.quit()
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_ESCAPE):
-            if len(game_framework.stack) == 2:
-                game_framework.pop_state()
-            else:
-                game_framework.quit()
+            pass
+            # if len(game_framework.stack) == 2:
+            #     game_framework.pop_state()
+            # else:
+            #     game_framework.quit()
         else:
             pass
             server.player.handle_event(event)

@@ -78,11 +78,12 @@ class HURT:
                 stage_1.Stage.bgm = load_music('sound/Clear.mp3')
                 stage_1.Stage.bgm.set_volume(32)
                 stage_1.Stage.bgm.play()
-                game_world.remove_object(self)
+                self.x = 10000
 
             self.end = time.time()
-            if self.end - self.start > 3:
-                 game_framework.push_state(final_state)
+            if self.end - self.start > 10:
+                game_world.remove_object(self)
+                game_framework.push_state(final_state)
 
         elif self.timer <= 0:
             self.add_event(TURN)

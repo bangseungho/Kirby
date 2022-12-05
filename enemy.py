@@ -42,6 +42,7 @@ class DEATH:
         self.death_timer -= 1
 
         if self.death_timer == 0:
+            server.total_enemy_num -= 1
             game_world.remove_object(self)
 
     def draw(self):

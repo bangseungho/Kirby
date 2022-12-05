@@ -174,6 +174,7 @@ class Stage:
         self.x, self.y = 0, 0
         self.type = 0
         self.stype = 1
+        self.total_num = 0
         Stage.next_state_sound = load_wav('sound/Next.wav')
         Stage.next_state_sound.set_volume(32)
 
@@ -209,19 +210,22 @@ class Stage:
     def add_enemy(self, num, TYPE):
         for n in range(num):
             server.enemy.append(TYPE())
+        server.total_enemy_num += num
 
     def add_event(self, event):
         self.event_que.insert(0, event)
 
     def handle_event(self, event):
         if event.type == SDL_KEYDOWN:
-            if event.key == SDLK_RIGHTBRACKET:
-                Stage.next_state_sound.play()
-                self.add_event(NEXT)
-            if event.key == SDLK_LEFTBRACKET:
-                self.add_event(PREV)
+            pass
+            # if event.key == SDLK_RIGHTBRACKET:
+            #     Stage.next_state_sound.play()
+            #     self.add_event(NEXT)
+            # if event.key == SDLK_LEFTBRACKET:
+            #     self.add_event(PREV)
         if event.type == SDL_KEYDOWN:
             if event.key == SDLK_UP:
-                if server.player.x >= 1920 and server.player.x <= 1950:
+                if server.player.x >= 1920 and server.player.x <= 1950 and\
+                    server.total_enemy_num == 0:
                     Stage.next_state_sound.play()
                     self.add_event(NEXT)
