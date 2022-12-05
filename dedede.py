@@ -17,7 +17,7 @@ class Dstar:
     def __init__(self, x= 400, y=300 , velocity=1):
         if Dstar.image == None:
             Dstar.image = load_image('resource/dedede_star.png')
-        self.x, self.y, self.velocity = x + 1 * velocity * 20, y, velocity
+        self.x, self.y, self.velocity = x + 1 * velocity * 60, y - 20, velocity
         self.isFire = False
         self.isCrush = False
         self.face_dir = 1
@@ -28,7 +28,7 @@ class Dstar:
 
     def draw(self):
         self.image.clip_composite_draw(int(
-                        self.frame) * self.w, 0, 32, 32, self.rotate, ' ', self.x, self.y, 50, 50)
+                        self.frame) * self.w, 0, 32, 32, self.rotate, ' ', self.x, self.y, 60, 60)
         
     def update(self):
         self.frame = (self.frame + 7 * game_framework.frame_time)
@@ -65,7 +65,7 @@ class HURT:
     def do(self):
         self.x += self.dir_damge / 10
         self.timer -= 1
-        if self.life <= 18:
+        if self.life <= 0:
             self.death_timer -= 1
 
             if self.death_timer == 0:
@@ -101,25 +101,65 @@ class RUN:
                       self.ACTION_PER_TIME * game_framework.frame_time) % self.FRAMES_PER_ACTION
        
         
-        if self.dis_to_player <= 300:
+        if self.dis_to_player <= 300 and self.height_to_player <= 100:
             self.set_speed(1.3, 4)
             self.set_image(80, 80, 242)
             if self.x < server.player.screen_x:
                 self.dir = 1
             else:
                 self.dir = -1
-            self.x += self.dir * self.RUN_SPEED_PPS * game_framework.frame_time * 1.3
+            self.x += self.dir * self.RUN_SPEED_PPS * game_framework.frame_time
         else:
             self.set_speed(1.3, 4)
             self.set_image(70, 70, 110)
         
-        if self.dis_to_player <= 150 and self.y > server.player.y:
-            self.add_event(JATTACK)
+        if self.dis_to_player <= 150 and self.height_to_player <= 100:
+            randValue = random.randint(1, 2)
+            if randValue == 1:
+                self.add_event(JATTACK)
+            elif randValue == 2:
+                self.add_event(SATTACK)
+
 
         self.face_dir = self.dir
 
     def draw(self):
         self.scomposite_draw()
+
+
+class STRONGATTACK:
+    @staticmethod
+    def enter(self, event):
+        self.timer = 1300
+        self.y = 165
+        self.frame = 0
+        self.set_speed(1.3, 8)
+        self.set_image(150, 150, 322)
+        pass
+
+    @staticmethod
+    def exit(self, event):
+        pass
+
+    @staticmethod
+    def do(self):
+        self.frame = (self.frame + self.FRAMES_PER_ACTION *
+                self.ACTION_PER_TIME * game_framework.frame_time)
+
+        if self.x < server.player.screen_x:
+            self.dir = 1
+        else:
+            self.dir = -1
+        self.x += self.dir * self.RUN_SPEED_PPS * game_framework.frame_time * 2
+
+        if int(self.frame) == 8:
+            self.add_event(TURN)
+
+        self.face_dir = self.dir
+
+    def draw(self):
+        self.scomposite_draw()
+
 
 class JUMPATTACK:
     @staticmethod
@@ -188,16 +228,19 @@ class Dedede(Enemy):
         super(Dedede, self).__init__(600, 155, 70, 70, 0, RUN, 10)
         if Dedede.image == None:
             Dedede.image = load_image("resource/dedede.png")
+            self.hp = load_image("resource/dedede_hp.png")
+            self.icon = load_image("resource/dedede_icon.png")
         self.temp_dir = 1
         self.v, self.m = VELOCITY, MASS
         self.JUMP_HEIGHT = 0.0022
-        self.life = 20
+        self.life = 10
         self.timer = random.randint(1000, 1500)
         self.next_state = {
-            RUN:  {PATROL: JUMPATTACK, DAMAGED: HURT, SUCKED: RUN, JATTACK: JUMPATTACK},
-            JUMPATTACK: { TURN: RUN, DAMAGED: HURT, SUCKED: JUMPATTACK},
-            PULL : { TURN: RUN, PATROL: RUN, DAMAGED: DEATH, SUCKED: PULL },
-            HURT : { TURN: RUN, PATROL: RUN, DAMAGED: HURT, SUCKED: RUN, JATTACK: JUMPATTACK}
+            RUN:  {PATROL: JUMPATTACK, DAMAGED: HURT, JATTACK: JUMPATTACK, SATTACK: STRONGATTACK},
+            JUMPATTACK: { TURN: RUN, DAMAGED: HURT, },
+            STRONGATTACK: { TURN: RUN, DAMAGED: HURT, },
+            PULL : { TURN: RUN, PATROL: RUN, DAMAGED: DEATH,  },
+            HURT : { TURN: RUN, PATROL: RUN, DAMAGED: HURT, JATTACK: JUMPATTACK, SATTACK: STRONGATTACK}
         }
 
     def handle_collision(self, other, group):

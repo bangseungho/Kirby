@@ -8,8 +8,8 @@ import game_world
 
 import server
 
-TIMER, TURN, PATROL, DAMAGED, SUCKED, JATTACK = range(6)
-event_name = ['TIMER', 'TURN', 'PATROL', 'DAMAGED', 'SUCKED', 'JATTACK']
+TIMER, TURN, PATROL, DAMAGED, SUCKED, JATTACK, SATTACK = range(7)
+event_name = ['TIMER', 'TURN', 'PATROL', 'DAMAGED', 'SUCKED', 'JATTACK', 'SATTACK']
 
 class DEATH:
     @staticmethod
@@ -159,6 +159,11 @@ class Enemy:
         else:
             self.image.clip_composite_draw(int(
                 self.frame) * self.w, self.image_posY, self.w, self.h, 0, 'h', self.x, self.y, self.w * 2, self.h * 2)
+        if self.type == 10 and self.life > 0:
+            self.hp.clip_composite_draw(int(10 - self.life) * 142 , 0, 142 , 17, 0, ' ', 400, 50, 400, 34)
+            self.icon.draw(750, 50, 100, 100)
+
+
 
     def add_event(self, event):
         self.event_que.insert(0, event)

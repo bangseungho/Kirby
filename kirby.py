@@ -322,20 +322,21 @@ class SUCK:
                             self.add_event(BITE)
 
             for enemy in server.enemy:
-                if SUCK.range[RIGHT] > enemy.x - enemy.w and \
-                SUCK.range[LEFT] < enemy.x + enemy.w and \
-                SUCK.range[TOP] > enemy.y - enemy.h and \
-                SUCK.range[BOTTOM] < enemy.y + enemy.h:
+                if enemy.type != 10:
+                    if SUCK.range[RIGHT] > enemy.x - enemy.w and \
+                    SUCK.range[LEFT] < enemy.x + enemy.w and \
+                    SUCK.range[TOP] > enemy.y - enemy.h and \
+                    SUCK.range[BOTTOM] < enemy.y + enemy.h:
 
-                    enemy.add_event(SUCKED)
+                        enemy.add_event(SUCKED)
 
-                    if enemy.dis_to_player <= 5:
-                        self.bite_enemy_type = enemy.type
-                        enemy.death_timer = 1
-                        enemy.add_event(DAMAGED)
-                        enemy.x = -10000
-                        self.isBite = True
-                        self.add_event(BITE)
+                        if enemy.dis_to_player <= 5:
+                            self.bite_enemy_type = enemy.type
+                            enemy.death_timer = 1
+                            enemy.add_event(DAMAGED)
+                            enemy.x = -10000
+                            self.isBite = True
+                            self.add_event(BITE)
 
             self.jump()
     @staticmethod
