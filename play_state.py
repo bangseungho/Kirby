@@ -1,13 +1,12 @@
 from pico2d import *
 import game_framework
 import game_world
-
+import datetime
 import server
 
 from kirby import Kirby
 from stage_1 import Stage
 from enum import Enum
-
 
 class Type(Enum):
     Stage = 0
@@ -40,6 +39,8 @@ def handle_events():
 
 # 초기화
 def enter():
+    server.player_die = False
+    server.start_time = datetime.datetime.now()
     server.stage = Stage()
     game_world.add_object(server.stage, 0)
 
@@ -71,7 +72,6 @@ def update():
         if collide(a, b):
             a.handle_collision(b, group)
             b.handle_collision(a, group)
-
 
 def draw_world():
     for game_object in game_world.all_objects():
