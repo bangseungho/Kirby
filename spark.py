@@ -90,6 +90,7 @@ class JUMP:
 class ATTACK:
     @staticmethod
     def enter(self, event):
+        Spark.spark_sound.play()
         self.frame = 0
         self.set_speed(1.3, 15)
         self.set_image(64, 64, 38)

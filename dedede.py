@@ -6,8 +6,6 @@ import random
 import game_framework
 import game_world
 import stage_1
-import final_state
-import time
 
 VELOCITY = 5
 MASS = 10
@@ -59,6 +57,7 @@ class HURT:
         print(self.life)
         self.frame = 0
         self.timer = 200
+
     @staticmethod
     def exit(self, event):
         pass
@@ -68,10 +67,6 @@ class HURT:
         self.x += self.dir_damge / 10
         self.timer -= 1
         if self.life <= 0:
-            if self.life == 0:
-                self.start = time.time()
-                self.life -= 1
-
             self.death_timer -= 1
 
             if self.death_timer == 0:
@@ -80,13 +75,6 @@ class HURT:
                 stage_1.Stage.bgm.set_volume(32)
                 stage_1.Stage.bgm.play()
                 game_world.remove_object(self)
-
-            self.end = time.time()
-            print(self.end - self.start)
-            
-            if self.end - self.start > 3:
-                 game_framework.push_state(final_state)
-
         elif self.timer <= 0:
             self.add_event(TURN)
 
@@ -152,7 +140,6 @@ class STRONGATTACK:
         self.frame = 0
         self.set_speed(1.3, 8)
         self.set_image(150, 150, 322)
-        self.sound = False
         pass
 
     @staticmethod
@@ -163,10 +150,6 @@ class STRONGATTACK:
     def do(self):
         self.frame = (self.frame + self.FRAMES_PER_ACTION *
                 self.ACTION_PER_TIME * game_framework.frame_time)
-
-        if int(self.frame) == 7 and not self.sound:
-            Dedede.jump_attack_sound.play()
-            self.sound = True
 
         if self.x < server.player.screen_x:
             self.dir = 1
@@ -259,8 +242,6 @@ class Dedede(Enemy):
         self.v, self.m = VELOCITY, MASS
         self.JUMP_HEIGHT = 0.0022
         self.life = 10
-        self.end = 0
-        self.start = 0
         self.timer = random.randint(1000, 1500)
         self.next_state = {
             RUN:  {PATROL: JUMPATTACK, DAMAGED: HURT, JATTACK: JUMPATTACK, SATTACK: STRONGATTACK},

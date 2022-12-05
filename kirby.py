@@ -17,7 +17,6 @@ import server
 from spark import Spark
 from stage_1 import STAGE_1
 from stage_1 import STAGE_2
-import final_state
 
 LEFT = 0
 BOTTOM = 1
@@ -360,6 +359,7 @@ class SUCK:
 class TRANSFORM:
     @staticmethod
     def enter(self, event):
+        print('ENTER TRANSFORM')
         Kirby.transform_sound.play()
         self.effect = load_image('resource/trans_effect.png')
         self.frame = 0
@@ -370,9 +370,6 @@ class TRANSFORM:
     def exit(self, event):
         print('EXIT TRANSFORM')
         match(self.bite_enemy_type):
-            case None:
-                self.ability = Ability.Defualt
-                self.image = load_image('resource/Default_Kirby.png')
             case 2:
                 self.ability = Ability.Spark
                 self.image = load_image('resource/Spark_Kirby.png')
@@ -667,10 +664,8 @@ class Kirby:
                     self.isBite = False
                 self.diry -= 1
             if event.key == SDLK_BACKSPACE:
-                self.add_event(TRANS)
-                # self.ability = Ability.Defualt
-                # self.image = load_image('resource/Default_Kirby.png')
-                
+                self.ability = Ability.Defualt
+                self.image = load_image('resource/Default_Kirby.png')
             if event.key == SDLK_SPACE:
                 self.frame = 0
             if event.key == SDLK_b:
@@ -708,6 +703,8 @@ class Kirby:
     def composite_draw(self):
         sx, sy = self.x - server.stage.window_left, self.y - server.stage.window_bottom
 
+        server.player.font.draw(sx - 60, sy + 50, 'player_x : %d' % (self.screen_x), (255, 255, 0))
+
         self.cnt += 1
         if self.invincible:
             if self.cnt % 2 == 0:
@@ -738,9 +735,6 @@ class Kirby:
             if self.hps <= 0:
                 self.lifes -= 1
                 self.hps = 6
-            if self.lifes < 0:
-                server.player_die = True
-                game_framework.change_state(final_state)
 
     def fire_star(self):
         star = Star(self.screen_x, self.y, self.face_dir*2)
@@ -761,9 +755,6 @@ class Kirby:
         game_world.add_object(breath, 1)
         Kirby.breath_sound.play()
 
-    def default_kirby(self):
-        self.ability = Ability.Defualt
-        self.image = load_image('resource/Default_Kirby.png')
 
     def get_bb(self):
         if self.cur_state == Ability.Spark:

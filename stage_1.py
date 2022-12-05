@@ -1,6 +1,5 @@
 from pico2d import *
 import game_world
-from enum import Enum
 import game_framework
 from player_speed import *
 from spark import Spark
@@ -9,13 +8,13 @@ from hothead import Hothead
 from dedede import Dedede
 from enemy import Enemy
 import server
-import kirby
 
 NEXT, PREV, UD = range(3)
 
 event_name = ['NEXT', 'PREV', 'UD']
 
 cnt = 0
+
 
 class Obstacle:
     def __init__(self, x, y, w, h):
@@ -116,8 +115,6 @@ class STAGE_2:
         server.player.x = 200
         server.player.screen_x = 200
         server.player.sx = 200
-        server.player.default_kirby()
-        print(server.player.ability)
 
         self.background_image = load_image('resource/stage1_background.png')
         self.land_image = load_image('resource/stage2_land.png')
@@ -140,6 +137,7 @@ class STAGE_2:
 
         game_world.add_collision_pairs(
             server.player, self.obstacles, 'player:ob')
+        # self.add_enemy(1, Spark)
 
         print('ENTER STAGE1')
 
@@ -200,9 +198,8 @@ class Stage:
 
     def draw(self):
         self.cur_state.draw(self)
-        # for ob in self.obstacles:
-        #     pass
-            # draw_rectangle(*ob.get_bb())
+        for ob in self.obstacles:
+            draw_rectangle(*ob.get_bb())
 
     def add_obstacle(self, x, y, w, h):
         self.obstacles.append(Obstacle(x, y, w, h))
@@ -221,8 +218,3 @@ class Stage:
                 self.add_event(NEXT)
             if event.key == SDLK_LEFTBRACKET:
                 self.add_event(PREV)
-        if event.type == SDL_KEYDOWN:
-            if event.key == SDLK_UP:
-                if server.player.x >= 1920 and server.player.x <= 1950:
-                    Stage.next_state_sound.play()
-                    self.add_event(NEXT)
