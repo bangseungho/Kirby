@@ -301,6 +301,26 @@ class SUCK:
             SUCK.range = [self.screen_x - 50 + 50 * self.face_dir, self.y -
                         22, self.screen_x + 50 + 50 * self.face_dir, self.y + 22]
 
+            for star in game_world.all_objects():
+                if star.type == 11:
+                    if SUCK.range[RIGHT] > star.x - star.w and \
+                    SUCK.range[LEFT] < star.x + star.w and \
+                    SUCK.range[TOP] > star.y - star.h and \
+                    SUCK.range[BOTTOM] < star.y + star.h:
+                        if star.x < server.player.screen_x:
+                            star.x += 100 * game_framework.frame_time * 1.3
+                        else:
+                            star.x -= 100 * game_framework.frame_time * 1.3
+                        if star.y < server.player.y:
+                            star.y += 100 * game_framework.frame_time * 1.3
+                        else:
+                            star.y -= 100 * game_framework.frame_time * 1.3
+
+                        if abs(star.x - server.player.x) <= 5:
+                            game_world.remove_object(star)
+                            self.isBite = True
+                            self.add_event(BITE)
+
             for enemy in server.enemy:
                 if SUCK.range[RIGHT] > enemy.x - enemy.w and \
                 SUCK.range[LEFT] < enemy.x + enemy.w and \
@@ -722,4 +742,8 @@ class Kirby:
                         self.damaged(1)
         if group == 'fire:player':
             self.damaged(3)
+        if group == 'player:dedede':
+            if other.dis_to_player <= 50:
+                self.damaged(1)
+                
             

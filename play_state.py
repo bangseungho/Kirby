@@ -21,6 +21,7 @@ class Type(Enum):
     Beam_Laser = 8
     KBeam_Laser = 9
     Dedede = 10
+    Dstar = 11
 
 def handle_events():
     events = get_events()

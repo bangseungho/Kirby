@@ -117,13 +117,14 @@ class STAGE_2:
 
         self.add_enemy(1, Dedede)
         game_world.add_objects(server.enemy, 1)
+        game_world.add_collision_pairs(server.player, server.enemy, 'player:dedede')
+        game_world.add_collision_pairs(None, server.enemy, 'star:enemy')
 
         self.canvas_width = get_canvas_width()
         self.canvas_height = get_canvas_height()
         self.w = 800
         self.h = self.land_image.h
         self.y = self.canvas_height // 2
-
         
 
         game_world.add_collision_pairs(
