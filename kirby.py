@@ -610,8 +610,7 @@ class Kirby:
     def jump(self):
         if self.isJump == 1:
             if self.v > 0:
-                F = ((RUN_SPEED_PPS * JUMP_HEIGHT)
-                     * self.m * (self.v ** 2)) / 25
+                F = ((RUN_SPEED_PPS * JUMP_HEIGHT) * self.m * (self.v ** 2)) / 25
                 self.y += round(F)
                 self.v -= 1
 

@@ -276,13 +276,6 @@ class Dedede(Enemy):
         if group == 'star:enemy':
             self.add_event(DAMAGED)
             self.life -= 1
-        if group == 'player:enemy':
-            if other.cur_state == kirby.ABILITY and not self.isDeath:
-                self.add_event(DAMAGED)
-                if self.x < other.screen_x:
-                    self.dir_damge = -1
-                else:
-                    self.dir_damge = 1
     
     def make_star(self):
         dstar = Dstar(self.x, 155, self.face_dir*2)
