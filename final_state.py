@@ -1,9 +1,6 @@
 from pico2d import *
 import game_framework
-import play_state
-import stage_state
 import server
-import kirby
 import datetime
 
 back_ground_image = None
@@ -18,19 +15,21 @@ pdir = 1
 bgm = None
 
 def enter():
+    from kirby import IDLE
     global back_ground_image
     global back_ground_die_image
     back_ground_image = load_image('resource/black.png')
     back_ground_die_image = load_image('resource/black_die.png')
     server.clear_time = datetime.datetime.now()
     server.elapsed = server.clear_time - server.start_time
-    server.player.cur_state = kirby.IDLE
+    server.player.cur_state = IDLE
 
 def exit():
     pass
 
 
 def update():
+    import play_state
     global logo_time
     global logo_frame
     global back_ground_x
@@ -50,6 +49,7 @@ def update():
 
 
 def draw():
+    import play_state
     global back_ground_image
     global back_ground_die_image
     clear_canvas()

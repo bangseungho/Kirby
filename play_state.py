@@ -1,12 +1,10 @@
 from pico2d import *
+from enum import Enum
+
 import game_framework
 import game_world
 import datetime
 import server
-
-from kirby import Kirby
-from stage_1 import Stage
-from enum import Enum
 
 class Type(Enum):
     Stage = 0
@@ -29,10 +27,6 @@ def handle_events():
             game_framework.quit()
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_ESCAPE):
             pass
-            # if len(game_framework.stack) == 2:
-            #     game_framework.pop_state()
-            # else:
-            #     game_framework.quit()
         else:
             pass
             server.player.handle_event(event)
@@ -40,6 +34,8 @@ def handle_events():
 
 # 초기화
 def enter():
+    from kirby import Kirby
+    from stage_1 import Stage
     server.player_die = False
     server.start_time = datetime.datetime.now()
     server.stage = Stage()

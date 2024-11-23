@@ -1,7 +1,5 @@
 from pico2d import *
-import game_world
 import game_framework
-import play_state
 
 class KBeam:
     image = None

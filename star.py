@@ -1,10 +1,6 @@
 from pico2d import *
 from enemy import Enemy
-import game_world
 import game_framework
-import kirby
-import server
-import player_speed
 
 
 class Star:

@@ -1,22 +1,15 @@
 from pico2d import *
+from enemy import TIMER, TURN, DAMAGED, SUCKED, PULL, ATTACK
+
 from star import Star
 from breath import Breath
 from enum import Enum
 from player_speed import *
-import play_state
 import game_world
-from spark import DAMAGED
 import game_framework
-from spark import ATTACK
-from spark import SUCKED
-from spark import PULL
-from spark import TURN
 import time
 from beam import KBeam
 import server
-from spark import Spark
-from stage_1 import STAGE_1
-from stage_1 import STAGE_2
 import final_state
 
 LEFT = 0
@@ -34,7 +27,6 @@ class Ability(Enum):
 
 # 1 : 이벤트 정의
 RD, LD, RU, LU, TIMER, CD, CU, BITE, TRANS, AATTACK = range(10)
-
 event_name = ['RD', 'LD', 'RU', 'LU', 'TIMER', 'CD', 'CU', 'BITE', 'TRANS', 'AATTACK']
 
 key_event_table = {
@@ -412,7 +404,7 @@ class ABILITY:
         self.v = 1
         match(self.ability):
             case Ability.Spark:
-                Spark.spark_sound.play()
+                # Spark.spark_sound.play()
                 self.set_speed(0.5, 11) 
                 self.set_image(64, 74, 258, 0, 0)
             case Ability.Laser:

@@ -3,7 +3,6 @@ from enum import Enum
 import game_framework
 import player_speed
 import random
-import math
 import game_world
 
 import server
@@ -51,7 +50,8 @@ class DEATH:
         elif self.death_timer % 2 == 0:
             self.scomposite_draw()
 
-
+class ATTACK:
+    pass
 
 class PULL:
     def enter(self, event):

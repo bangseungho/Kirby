@@ -1,10 +1,8 @@
 from pico2d import *
 from enemy import *
 from enum import Enum
-import kirby
 import random
 import game_framework
-import game_world
 
 
 class RUN:
@@ -134,6 +132,7 @@ class Spark(Enemy):
         Spark.spark_sound.set_volume(32)
 
     def handle_collision(self, other, group):
+        from kirby import ABILITY
         if group == 'enemy:ob':
             self.dir *= -1
             self.timer = random.randint(200, 400)
@@ -141,7 +140,7 @@ class Spark(Enemy):
             self.add_event(DAMAGED)
             self.dir_damge = other.face_dir
         if group == 'player:enemy':
-            if other.cur_state == kirby.ABILITY and not self.isDeath:
+            if other.cur_state == ABILITY and not self.isDeath:
                 self.add_event(DAMAGED)
                 if self.x < other.screen_x:
                     self.dir_damge = -1

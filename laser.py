@@ -1,12 +1,10 @@
 from pico2d import *
 from enemy import *
 from enum import Enum
-import kirby
-import random
+from kirby import ABILITY
 import game_framework
 import game_world
 import time
-
 
 class beam_laser:
     def __init__(self, x, y):
@@ -98,7 +96,7 @@ class Laser(Enemy):
             self.add_event(DAMAGED)
             self.dir_damge = other.face_dir
         if group == 'player:enemy':
-            if other.cur_state == kirby.ABILITY and not self.isDeath:
+            if other.cur_state == ABILITY and not self.isDeath:
                 self.add_event(DAMAGED)
                 if self.x < other.screen_x:
                     self.dir_damge = -1
