@@ -1,5 +1,6 @@
 from pico2d import *
 from enemy import TIMER, TURN, DAMAGED, SUCKED, PULL, ATTACK
+from ResourceMgr import resource
 
 from star import Star
 from breath import Breath
@@ -40,10 +41,7 @@ key_event_table = {
 
 
 # 2 : 상태의 정의
-
-
 class IDLE:
-    @staticmethod
     def enter(self, event):
         global PREV
         PREV = IDLE
@@ -51,7 +49,6 @@ class IDLE:
         self.dir = 0
         self.timer = 40
 
-    @staticmethod
     def exit(self, event):
         self.prev_event = self.face_dir
         if self.isBite == 1 and event == CD:
@@ -59,14 +56,12 @@ class IDLE:
             self.isBite = 2
         print('EXIT IDLE')
 
-    @staticmethod
     def do(self):
         self.frame = (self.frame + FRAMES_PER_ACTION *
                       ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
         self.jump()
         self.timer -= 1
 
-    @staticmethod
     def draw(self):
         if self.isJump == 0:  # 기본 상태
             if self.isBite == True:
@@ -105,7 +100,7 @@ class IDLE:
                     self.set_image(26, 22, 40, 1, 20)
         else:  # 나는 상태
             if int(self.frame) == 12:
-                Kirby.fly_sound.play()
+                resource("Fly").play()
                 self.frame = 5
             self.set_speed(1.2, 13)
             self.set_image(28, 27, 84, 0, 15)
@@ -192,7 +187,7 @@ class RUN:
                     self.set_image(27, 22, 40, 0, 20)  # 바꿈
         else:  # 나는 상태
             if int(self.frame) == 12:
-                Kirby.fly_sound.play()
+                resource("Fly").play()
                 self.frame = 5
             self.set_speed(1.2, 13)
             self.set_image(28, 27, 84, 0, 15)
@@ -201,7 +196,7 @@ class RUN:
 
 class DASH:
     def enter(self, event):
-        Kirby.dash_sound.play()
+        resource("Dash").play()
         self.set_speed(0.5, 8)
         print('ENTER DASH')
         if event == RD:
@@ -263,20 +258,16 @@ class DASH:
 
 class SUCK:
     range = [0, 0, 0, 0]
-
-    @staticmethod
     def enter(self, event):
-        Kirby.suck_sound.set_volume(20)
-        print('ENTER SUCK')
+        resource("Suck").set_volume(20)
         if self.ability != Ability.Defualt:
             self.add_event(AATTACK)
         self.set_speed(0.3, 5)
         self.frame = 0
         self.dir = 0
 
-    @staticmethod
     def exit(self, event):
-        Kirby.suck_sound.set_volume(0)
+        resource("Suck").set_volume(0)
         if self.ability == Ability.Defualt:
             if PREV == IDLE:
                 self.cur_state = IDLE
@@ -290,11 +281,9 @@ class SUCK:
                 if enemy.cur_state == PULL:
                     enemy.add_event(TURN)
             self.timer = 0
-        print('EXIT SUCK')
 
-    @staticmethod
     def do(self):
-        Kirby.suck_sound.play()
+        resource("Suck").play()
         if self.ability == Ability.Defualt:
             self.frame = (self.frame + FRAMES_PER_ACTION *
                         ACTION_PER_TIME * game_framework.frame_time)
@@ -339,44 +328,38 @@ class SUCK:
                             self.add_event(BITE)
 
             self.jump()
-    @staticmethod
     def draw(self):
         if int(self.frame) == 5:
             self.frame = 2
         self.set_image(25, 22, 270, 0, 0)
-        # draw_rectangle(SUCK.range[LEFT], SUCK.range[BOTTOM],
-        #                SUCK.range[RIGHT], SUCK.range[TOP])
         self.composite_draw()
 
 
 class TRANSFORM:
-    @staticmethod
     def enter(self, event):
-        Kirby.transform_sound.play()
+        resource("Transform").play()
         self.effect = load_image('resource/trans_effect.png')
         self.frame = 0
         self.effect_frame = 0
         self.dir = 0
 
-    @staticmethod
     def exit(self, event):
         print('EXIT TRANSFORM')
         match(self.bite_enemy_type):
             case None:
                 self.ability = Ability.Defualt
-                self.image = load_image('resource/Default_Kirby.png')
+                self.image = resource("Default_Kirby")
             case 2:
                 self.ability = Ability.Spark
-                self.image = load_image('resource/Spark_Kirby.png')
+                self.image = resource("Spark_Kirby")
             case 3:
                 self.ability = Ability.Laser
-                self.image = load_image('resource/Laser_Kirby.png')
+                self.image = resource("Laser_Kirby")
             case 4:
                 self.ability = Ability.Fire
-                self.image = load_image('resource/Fire_Kirby.png')
+                self.image = resource("Fire_Kirby")
         self.bite_enemy_type = None
                 
-    @staticmethod
     def do(self):
         self.set_speed(1.0, 16)
         self.frame = (self.frame + FRAMES_PER_ACTION *
@@ -389,7 +372,6 @@ class TRANSFORM:
         if int(self.effect_frame) == 16:
             self.add_event(TIMER)
 
-    @staticmethod
     def draw(self):
         self.set_image(32, 22, 510, 0, 0)
         self.composite_draw()
@@ -398,13 +380,12 @@ class TRANSFORM:
         self.ecomposite_draw(self.effect)
 
 class ABILITY:
-    @staticmethod
     def enter(self, event):
         print('ENTER ABILITY')
         self.v = 1
         match(self.ability):
             case Ability.Spark:
-                # Spark.spark_sound.play()
+                resource("Spark").play()
                 self.set_speed(0.5, 11) 
                 self.set_image(64, 74, 258, 0, 0)
             case Ability.Laser:
@@ -415,7 +396,6 @@ class ABILITY:
 
         self.frame = 0
 
-    @staticmethod
     def exit(self, event):
         if PREV == RUN:
             if event == RD:
@@ -431,7 +411,6 @@ class ABILITY:
             self.timer = 0                
         print('EXIT ABILITY')
        
-    @staticmethod
     def do(self):
         match(self.ability):
             case Ability.Spark:
@@ -448,7 +427,6 @@ class ABILITY:
             case Ability.Fire:
                 pass
 
-    @staticmethod
     def draw(self):
         self.composite_draw()
         pass
@@ -467,16 +445,6 @@ next_state = {
 
 
 class Kirby:
-    breath_sound = None
-    suck_sound = None
-    transform_sound = None
-    laser_sound = None
-    star_sound = None
-    jump_sound = None
-    dash_sound = None
-    fly_sound = None
-    drop_sound = None
-    
     def __init__(self):
         self.x, self.y = 400, 90
         self.screen_x, self.screen_y = 800 // 2, 90
@@ -486,14 +454,7 @@ class Kirby:
         self.frame = 0
         self.dir, self.diry, self.face_dir = 0, 0, 1
         self.ability = Ability.Defualt
-        self.image = load_image('resource/Default_Kirby.png')
-        #----------------------------------------------------
-        self.Life = load_image("resource/life_hud.png")
-        self.Life_0 = load_image("resource/0_hud.png")
-        self.Life_1 = load_image("resource/1_hud.png")
-        self.Life_2 = load_image("resource/2_hud.png")
-        self.Life_x = load_image("resource/x_hud.png")
-        self.Hp = load_image("resource/hp_hud.png")
+        self.image = resource("Default_Kirby")
         self.lifes = 2
         self.hps = 6
         self.invincible = False
@@ -521,25 +482,6 @@ class Kirby:
         self.beam_cnt = 0
         self.font = load_font('ENCR10B.TTF', 16)
         #---------------------------------------------------- 
-        if Kirby.breath_sound is None:
-            Kirby.breath_sound = load_wav('sound/Breath.wav')
-            Kirby.breath_sound.set_volume(32)
-            Kirby.star_sound = load_wav('sound/Star.wav')
-            Kirby.star_sound.set_volume(32)
-            Kirby.suck_sound = load_wav('sound/Suck.wav')
-            Kirby.suck_sound.set_volume(32)
-            Kirby.jump_sound = load_wav('sound/Jump.wav')
-            Kirby.jump_sound.set_volume(32)
-            Kirby.laser_sound = load_wav('sound/Laser.wav')
-            Kirby.laser_sound.set_volume(32)
-            Kirby.dash_sound = load_wav('sound/Dash.wav')
-            Kirby.dash_sound.set_volume(32)
-            Kirby.transform_sound = load_wav('sound/Transform.wav')
-            Kirby.transform_sound.set_volume(32)
-            Kirby.fly_sound = load_wav('sound/Fly.wav')
-            Kirby.fly_sound.set_volume(32)
-            Kirby.drop_sound = load_wav('sound/Drop.wav')
-            Kirby.drop_sound.set_volume(32)
 
     def update(self):
         self.gravity()
@@ -563,23 +505,21 @@ class Kirby:
  
     def draw(self):
         self.cur_state.draw(self)
-
-        self.Life.draw(40, 420, 32, 25)
-
-        self.Life_x.draw(69, 419, 15.5, 16)
+        resource("life_hud").draw(40, 420, 32, 25)
+        resource("x_hud").draw(69, 419, 15.5, 16)
 
         if self.lifes == 2:
-            self.Life_0.draw(90, 420, 16, 22)
-            self.Life_2.draw(106, 420, 16, 22)
+            resource("0_hud").draw(90, 420, 16, 22)
+            resource("2_hud").draw(106, 420, 16, 22)
         if self.lifes == 1:
-            self.Life_0.draw(90, 420, 16, 22)
-            self.Life_1.draw(106, 420, 16, 22)
+            resource("0_hud").draw(90, 420, 16, 22)
+            resource("1_hud").draw(106, 420, 16, 22)
         if self.lifes == 0:
-            self.Life_0.draw(90, 420, 16, 22)
-            self.Life_0.draw(106, 420, 16, 22)
+            resource("0_hud").draw(90, 420, 16, 22)
+            resource("0_hud").draw(106, 420, 16, 22)
 
         for hp in range(self.hps):
-            self.Hp.draw(130 + hp * 18, 420, 18, 29.5)
+            resource("hp_hud").draw(130 + hp * 18, 420, 18, 29.5)
 
     def add_event(self, event):
         self.event_que.insert(0, event)
@@ -607,7 +547,7 @@ class Kirby:
                 self.v -= 1
 
             if self.isDrop == 2 and self.y < self.cur_floor:
-                Kirby.drop_sound.play()
+                resource("Drop").play()
                 self.y = self.cur_floor
                 self.v = VELOCITY - 30
                 self.isJump = 1
@@ -630,22 +570,10 @@ class Kirby:
             key_event = key_event_table[(event.type, event.key)]
             self.add_event(key_event)
         if event.type == SDL_KEYDOWN:
-            if event.key == SDLK_1:
-                self.ability = Ability.Defualt
-                self.image = load_image('resource/Default_Kirby.png')
-            if event.key == SDLK_2:
-                self.ability = Ability.Spark
-                self.image = load_image('resource/Spark_Kirby.png')
-            if event.key == SDLK_3:
-                self.ability = Ability.Laser
-                self.image = load_image('resource/Laser_Kirby.png')
-            if event.key == SDLK_4:
-                self.ability = Ability.Fire
-                self.image = load_image('resource/Fire_Kirby.png')
             if event.key == SDLK_SPACE:
                 self.can_jump = True
                 if self.isJump == 0:
-                    Kirby.jump_sound.play()
+                    resource("Jump").play()
                     self.isJump = 1
                 elif self.isJump == 1 and self.isBite == False:
                     self.isJump = 2
@@ -659,8 +587,6 @@ class Kirby:
                 self.diry -= 1
             if event.key == SDLK_BACKSPACE:
                 self.add_event(TRANS)
-                # self.ability = Ability.Defualt
-                # self.image = load_image('resource/Default_Kirby.png')
                 
             if event.key == SDLK_SPACE:
                 self.frame = 0
@@ -739,18 +665,18 @@ class Kirby:
         game_world.add_object(star, 1)
         game_world.add_collision_pairs(star, None, 'star:enemy')
         game_world.add_collision_pairs(star, None, 'star:ob')
-        Kirby.star_sound.play()
+        resource("Star").play()
 
     def fire_laser(self):
         kbeam = KBeam(self.screen_x, self.y, self.face_dir*2)
         game_world.add_object(kbeam, 1)
         game_world.add_collision_pairs(kbeam, None, 'kbeam:enemy')
-        Kirby.laser_sound.play()
+        resource("Laser").play()
 
     def fire_breath(self):
         breath = Breath(self.screen_x, self.y, self.face_dir*2, self.face_dir)
         game_world.add_object(breath, 1)
-        Kirby.breath_sound.play()
+        resource("Breath").play()
 
     def default_kirby(self):
         self.ability = Ability.Defualt
